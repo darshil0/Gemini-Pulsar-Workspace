@@ -1,15 +1,23 @@
 import React, { useState } from 'react';
 import { Mail, Send, Loader2, CheckCircle2, AlertCircle, Copy, Sparkles, User, Tag, Clock, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { analyzeEmail, EmailAnalysis } from '../services/gemini';
+import { analyzeEmail } from '../services/gemini';
 import { cn } from '../lib/utils';
+import { EmailAnalysis } from '../types';
 
+/**
+ * Intelligent Email Assistant component.
+ * Allows users to paste email text and get tone analysis, priority, action items, and a generated response.
+ */
 export const EmailHelper: React.FC = () => {
   const [input, setInput] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<EmailAnalysis | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  /**
+   * Triggers the Gemini-powered analysis of the input email text.
+   */
   const handleAnalyze = async () => {
     if (!input.trim()) return;
     setIsAnalyzing(true);

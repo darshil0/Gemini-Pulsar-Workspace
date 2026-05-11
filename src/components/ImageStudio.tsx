@@ -3,22 +3,23 @@ import { Upload, Image as ImageIcon, Sparkles, Download, Loader2, Wand2, Eraser,
 import { motion, AnimatePresence } from 'motion/react';
 import { transformImage } from '../services/gemini';
 import { cn } from '../lib/utils';
+import { IMAGE_STYLES } from '../constants';
+import { ImageTransformationResult } from '../types';
 
-const STYLES = [
-  { id: 'cyberpunk', label: 'Cyberpunk', icon: Sparkles, prompt: 'Apply a high-tech, neon-drenched cyberpunk aesthetic with deep blues and purples.' },
-  { id: 'sketch', label: 'Sketch', icon: Palette, prompt: 'Transform into a detailed pencil sketch or charcoal drawing.' },
-  { id: 'watercolor', label: 'Watercolor', icon: Palette, prompt: 'Apply a delicate watercolor painting effect with visible brush strokes and soft edges.' },
-  { id: 'vintage', label: 'Vintage', icon: Camera, prompt: 'Apply an aged, film-like vintage aesthetic with light leaks and grain.' },
-  { id: 'nobg', label: 'Remove BG', icon: Eraser, prompt: 'Remove the background and place the subject on a clean, professional studio background.' },
-  { id: 'enhance', label: 'Enhance', icon: Wand2, prompt: 'Enhance details, lighting, and colors while maintaining the original subject.' },
-];
+const iconMap: Record<string, any> = {
+  Sparkles,
+  Palette,
+  Camera,
+  Eraser,
+  Wand2
+};
 
 export const ImageStudio: React.FC = () => {
   const [image, setImage] = useState<string | null>(null);
   const [mimeType, setMimeType] = useState<string>('');
   const [prompt, setPrompt] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
-  const [result, setResult] = useState<{ imageUrl: string; analysis: string } | null>(null);
+  const [result, setResult] = useState<ImageTransformationResult | null>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -33,7 +34,6 @@ export const ImageStudio: React.FC = () => {
       setImage(objectUrl);
       setMimeType(file.type);
       
-      // We still need base64 for the Gemini API
       const reader = new FileReader();
       reader.onload = () => {
         // We'll store the base64 in a ref for the API call
@@ -135,18 +135,21 @@ export const ImageStudio: React.FC = () => {
                 Quick Styles
               </h3>
               <div className="grid grid-cols-2 md:grid-cols-3 gap-2">
-                {STYLES.map((style) => (
-                  <button
-                    key={style.id}
-                    disabled={!image || isProcessing}
-                    onClick={() => processImg(style.prompt)}
-                    className="flex flex-col items-center gap-2 p-3 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed group glass-hover"
-                    aria-label={`Apply ${style.label} style`}
-                  >
-                    <style.icon className="w-4 h-4 group-hover:scale-110 transition-transform text-blue-400" />
-                    <span className="text-[9px] font-bold uppercase tracking-tight">{style.label}</span>
-                  </button>
-                ))}
+                {IMAGE_STYLES.map((style) => {
+                  const IconComponent = iconMap[style.iconName] || Palette;
+                  return (
+                    <button
+                      key={style.id}
+                      disabled={!image || isProcessing}
+                      onClick={() => processImg(style.prompt)}
+                      className="flex flex-col items-center gap-2 p-3 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed group glass-hover"
+                      aria-label={`Apply ${style.label} style`}
+                    >
+                      <IconComponent className="w-4 h-4 group-hover:scale-110 transition-transform text-blue-400" />
+                      <span className="text-[9px] font-bold uppercase tracking-tight">{style.label}</span>
+                    </button>
+                  );
+                })}
               </div>
             </div>
 

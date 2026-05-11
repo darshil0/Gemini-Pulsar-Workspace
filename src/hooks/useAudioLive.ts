@@ -1,7 +1,12 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { connectLiveVoice } from '../services/gemini';
 import { LiveServerMessage } from '@google/genai';
+import { VOICE_CONFIG, JITTER_BUFFER } from '../constants';
 
+/**
+ * Hook to manage real-time audio interaction with Gemini Live.
+ * Handles microphone input, PCM streaming, and adaptive jitter buffering for playback.
+ */
 export const useAudioLive = () => {
   const [isActive, setIsActive] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
@@ -11,11 +16,14 @@ export const useAudioLive = () => {
   const audioContextRef = useRef<AudioContext | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const processorRef = useRef<ScriptProcessorNode | null>(null);
-  const sessionRef = useRef<any>(null); // LiveWebsocket is not exported directly for easy type usage in all versions, keeping as any but hardening usage
+  const sessionRef = useRef<any>(null); 
   const analyserRef = useRef<AnalyserNode | null>(null);
 
   const nextPlayTimeRef = useRef<number>(0);
 
+  /**
+   * Cleans up all audio resources and closes the WebSocket session.
+   */
   const stop = useCallback(() => {
     if (sessionRef.current) {
       try {
@@ -42,6 +50,9 @@ export const useAudioLive = () => {
     nextPlayTimeRef.current = 0;
   }, []);
 
+  /**
+   * Initializes the AudioContext, requests mic permissions, and connects to the Live service.
+   */
   const start = useCallback(async () => {
     if (isActive) return;
     setIsConnecting(true);
@@ -49,7 +60,9 @@ export const useAudioLive = () => {
     setTranscription('');
 
     try {
-      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({ sampleRate: 16000 });
+      const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({ 
+        sampleRate: VOICE_CONFIG.INPUT_SAMPLE_RATE 
+      });
       audioContextRef.current = audioContext;
       
       // Explicitly resume context for browser policies
@@ -97,7 +110,7 @@ export const useAudioLive = () => {
             for (let i = 0; i < pcm16.length; i++) float32[i] = pcm16[i] / 0x7FFF;
             
             try {
-              const buffer = audioContextRef.current.createBuffer(1, float32.length, 24000);
+              const buffer = audioContextRef.current.createBuffer(1, float32.length, VOICE_CONFIG.OUTPUT_SAMPLE_RATE);
               buffer.getChannelData(0).set(float32);
               
               const source = audioContextRef.current.createBufferSource();
@@ -107,13 +120,12 @@ export const useAudioLive = () => {
               // Adaptive Jitter Buffer logic
               // We maintain a 150ms lookahead to absorb network jitter
               const now = audioContextRef.current.currentTime;
-              const lookahead = 0.15; 
               
               let startTime = nextPlayTimeRef.current;
               
               // If we've drifted too far or are just starting, reset to now + lookahead
-              if (startTime < now || startTime > now + 1.0) {
-                startTime = now + lookahead;
+              if (startTime < now || startTime > now + JITTER_BUFFER.DRIFT_THRESHOLD) {
+                startTime = now + JITTER_BUFFER.LOOKAHEAD;
               }
               
               source.start(startTime);
@@ -157,7 +169,7 @@ export const useAudioLive = () => {
         
         try {
           sessionRef.current.sendRealtimeInput({
-            audio: { data: base64, mimeType: 'audio/pcm;rate=16000' }
+            audio: { data: base64, mimeType: `audio/pcm;rate=${VOICE_CONFIG.INPUT_SAMPLE_RATE}` }
           });
         } catch (err) {
           console.error("Error sending audio input:", err);
@@ -170,6 +182,7 @@ export const useAudioLive = () => {
       setIsConnecting(false);
     }
   }, [isActive, stop]);
+
 
 
   useEffect(() => {

@@ -1,8 +1,14 @@
 import { GoogleGenAI, Type, Modality } from "@google/genai";
+import { EmailAnalysis, ImageTransformationResult, LiveVoiceCallbacks } from "../types";
+import { MODELS, SYSTEM_INSTRUCTIONS, VOICE_CONFIG } from "../constants";
 
 // Initialize with lazy loading as per best practices
 let genAIInstance: GoogleGenAI | null = null;
 
+/**
+ * Ensures a single instance of the GoogleGenAI SDK is created.
+ * @returns The GoogleGenAI instance.
+ */
 const getAI = () => {
   if (!genAIInstance) {
     const apiKey = process.env.GEMINI_API_KEY;
@@ -14,19 +20,16 @@ const getAI = () => {
   return genAIInstance;
 };
 
-export interface EmailAnalysis {
-  category: string;
-  priority: 'low' | 'medium' | 'high' | 'urgent';
-  mood: string;
-  actionItems: string[];
-  draftReply: string;
-}
-
+/**
+ * Analyzes an email's content using Gemini to extract tone, priority, and action items.
+ * @param emailContent Raw text of the email thread.
+ * @returns Structured analysis and a draft reply.
+ */
 export const analyzeEmail = async (emailContent: string): Promise<EmailAnalysis> => {
   const ai = getAI();
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-3-flash-preview",
+      model: MODELS.GEMINI_FLASH,
       contents: `Analyze the following email content and provide structured data including:
       1. Category (e.g., Work, Personal, Spam, Newsletter)
       2. Priority (low, medium, high, urgent)
@@ -57,22 +60,29 @@ export const analyzeEmail = async (emailContent: string): Promise<EmailAnalysis>
 
     const text = response.text;
     if (!text) throw new Error("No response from Gemini");
-    return JSON.parse(text);
+    return JSON.parse(text) as EmailAnalysis;
   } catch (error) {
     console.error("Error analyzing email:", error);
     throw error;
   }
 };
 
+/**
+ * Transforms an image based on user instructions using Gemini Vision-to-Gen capabilities.
+ * @param imageBase64 Base64 encoded image string.
+ * @param mimeType Image MIME type.
+ * @param instruction Transformation instruction or style.
+ * @returns Transformed image URL or descriptive analysis.
+ */
 export const transformImage = async (
   imageBase64: string, 
   mimeType: string, 
   instruction: string
-): Promise<{ imageUrl: string; analysis: string }> => {
+): Promise<ImageTransformationResult> => {
   const ai = getAI();
   try {
     const response = await ai.models.generateContent({
-      model: "gemini-2.5-flash-image",
+      model: MODELS.GEMINI_IMAGE,
       contents: {
         parts: [
           {
@@ -107,20 +117,26 @@ export const transformImage = async (
   }
 };
 
-export const connectLiveVoice = (callbacks: any) => {
+/**
+ * Establishes a live WebSocket connection for low-latency voice interaction.
+ * @param callbacks Event hooks for transcription and audio output.
+ * @returns The active Live session.
+ */
+export const connectLiveVoice = (callbacks: LiveVoiceCallbacks) => {
   const ai = getAI();
   return ai.live.connect({
-    model: "gemini-3.1-flash-live-preview",
+    model: MODELS.GEMINI_LIVE,
     config: {
       responseModalities: [Modality.AUDIO],
       speechConfig: {
-        voiceConfig: { prebuiltVoiceConfig: { voiceName: "Zephyr" } },
+        voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICE_CONFIG.VOICE_NAME } },
       },
-      systemInstruction: "You are Pulsar, a helpful voice assistant. Keep responses concise and natural for conversation.",
+      systemInstruction: SYSTEM_INSTRUCTIONS.VOICE,
       outputAudioTranscription: {},
     },
-    ...callbacks
+    callbacks: callbacks as any
   });
 };
+
 
 

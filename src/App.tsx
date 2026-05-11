@@ -10,8 +10,7 @@ import { EmailHelper } from './components/EmailHelper';
 import { ImageStudio } from './components/ImageStudio';
 import { VocalWorkspace } from './components/VocalWorkspace';
 import { cn } from './lib/utils';
-
-type ActiveTab = 'email' | 'image' | 'voice' | 'settings';
+import { ActiveTab } from './types';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('email');
