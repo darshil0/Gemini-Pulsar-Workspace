@@ -1,0 +1,6 @@
+{
+  "name": "Gemini Pulsar Workspace",
+  "description": "A high-performance AI dashboard featuring an intelligent email assistant, generative image studio, and a real-time vocal workspace powered by Gemini.",
+  "requestFramePermissions": ["camera", "microphone"],
+  "majorCapabilities": ["AI Assistant", "Image Generation", "Voice Interface"]
+}
