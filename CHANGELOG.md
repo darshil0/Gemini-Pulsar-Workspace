@@ -7,15 +7,19 @@ All notable changes to this project will be documented in this file.
 - Implemented **Adaptive Jitter Buffer** (150ms lookahead) for ultra-smooth 24kHz audio playback.
 - Added **Orbital Frequency Visualizer** in Vocal Workspace for real-time engagement feedback.
 - Integrated `URL.createObjectURL` and `revokeObjectURL` for optimized image memory management in Image Studio.
+- Implemented **Email Helper Session History** to store and revisit the last 5 analyses in a transient local state.
+- Centralized **Types & Constants** (`/src/types.ts`, `/src/constants.ts`) for improved codebase stability and configuration.
 
 ### Changed
 - Hardened Error Logging: Stripped PII from transformation error logs to ensure privacy.
 - Enhanced "Clear" functionality: Explicitly resetting internal base64 buffers and revoking binary resources.
 - Optimized canvas rendering loop with circular geometry for the active Pulsar state.
+- Refactored Image Studio styles to support flexible icons and centralized prompt definitions.
 
 ### Fixed
 - Resolved audio drifting issues during long-form Gemini live sessions.
 - Fixed memory leakage vulnerability during rapid image re-uploads.
+- Corrected TypeScript interface mismatches in the Live Voice interaction layer.
 
 ## [1.2.0] - 2024-05-11
 ### Added

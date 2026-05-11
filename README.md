@@ -4,9 +4,9 @@ A high-performance AI dashboard featuring an intelligent email assistant, genera
 
 ## 🚀 Features
 
-- **Email Helper**: Multi-layered analysis of incoming threads including category detection, priority calculation, and tone sentiment. Generates professional drafts in seconds.
-- **Image Studio**: Upload and remix assets using vision-guided instructions and preset styles. Powered by Gemini 2.5 Flash Image.
-- **Vocal Workspace**: Low-latency, streaming voice interaction with real-time transcription and visual frequency feedback.
+- **Email Helper**: Multi-layered analysis of incoming threads including category detection, priority calculation, and tone sentiment. Now includes **Session History** to revisit recent analyses.
+- **Image Studio**: Upload and remix assets using vision-guided instructions and preset styles. Optimized with memory-efficient Blob handling.
+- **Vocal Workspace**: Low-latency, streaming voice interaction with **Adaptive Jitter Buffer** (150ms) and visual orbital frequency feedback.
 - **Modern UI**: Polished "Clean Minimalism" theme with glassmorphism effects, fluid animations, and a responsive bento-grid layout.
 
 ## 🛠️ Tech Stack
@@ -14,7 +14,7 @@ A high-performance AI dashboard featuring an intelligent email assistant, genera
 - **Framework**: React 18 + Vite
 - **Styling**: Tailwind CSS 4
 - **Animation**: Framer Motion (motion/react)
-- **AI Backend**: Google GenAI SDK (Gemini 3 Flash & Gemini 2.5 Flash Image)
+- **AI Backend**: Google GenAI SDK (Gemini 3 Flash, Gemini 2.5 Flash Image, and Gemini 3.1 Live)
 - **Icons**: Lucide React
 
 ## 🚥 Getting Started
@@ -28,4 +28,6 @@ A high-performance AI dashboard featuring an intelligent email assistant, genera
 - `/src/components`: UI modules for Email, Image, and Voice.
 - `/src/hooks`: Custom logic for Web Audio and Real-time streaming.
 - `/src/services`: Integration layer for the Gemini API.
+- `/src/types.ts`: Centralized TypeScript definitions.
+- `/src/constants.ts`: Application-wide configuration and static data.
 - `/src/index.css`: Global design system and glassmorphism utilities.
