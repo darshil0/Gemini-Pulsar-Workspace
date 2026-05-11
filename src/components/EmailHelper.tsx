@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
-import { Mail, Send, Loader2, CheckCircle2, AlertCircle, Copy, Sparkles, User, Tag, Clock } from 'lucide-react';
+import { Mail, Send, Loader2, CheckCircle2, AlertCircle, Copy, Sparkles, User, Tag, Clock, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { analyzeEmail, EmailAnalysis } from '../services/gemini';
 import { cn } from '../lib/utils';
-import ReactMarkdown from 'react-markdown';
 
 export const EmailHelper: React.FC = () => {
   const [input, setInput] = useState('');
@@ -26,15 +25,14 @@ export const EmailHelper: React.FC = () => {
     }
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
+  const clearInput = () => {
+    setInput('');
+    setResult(null);
+    setError(null);
   };
 
-  const priorityColors = {
-    low: 'text-blue-500 bg-blue-500/10',
-    medium: 'text-yellow-500 bg-yellow-500/10',
-    high: 'text-orange-500 bg-orange-500/10',
-    urgent: 'text-red-500 bg-red-500/10',
+  const copyToClipboard = (text: string) => {
+    navigator.clipboard.writeText(text);
   };
 
   return (
@@ -45,19 +43,32 @@ export const EmailHelper: React.FC = () => {
         animate={{ opacity: 1, x: 0 }}
         className="flex flex-col gap-4 min-h-0"
       >
-        <div className="flex-1 glass-card p-5 flex flex-col">
+        <div className="flex-1 glass-card p-5 flex flex-col relative group/input">
           <div className="flex items-center justify-between mb-4">
             <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Input Content</label>
-            <span className="text-[10px] bg-white/5 opacity-50 px-2 py-1 rounded font-mono">
-              {input.length} CHARS
-            </span>
+            <div className="flex items-center gap-3">
+              {input && (
+                <button 
+                  onClick={clearInput}
+                  className="text-[10px] font-bold text-red-400/60 hover:text-red-400 transition-colors uppercase tracking-widest flex items-center gap-1"
+                  aria-label="Clear input"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  Clear
+                </button>
+              )}
+              <span className="text-[10px] bg-white/5 opacity-50 px-2 py-1 rounded font-mono">
+                {input.length} CHARS
+              </span>
+            </div>
           </div>
           
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
-            placeholder="Paste your email here..."
-            className="flex-1 w-full bg-transparent border-none outline-none resize-none text-sm leading-relaxed placeholder:text-neutral-600"
+            placeholder="Paste your email thread or content here..."
+            className="flex-1 w-full bg-transparent border-none outline-none resize-none text-sm leading-relaxed placeholder:text-neutral-600 focus:ring-0"
+            aria-label="Email content input"
           />
         </div>
 
@@ -78,10 +89,11 @@ export const EmailHelper: React.FC = () => {
                 : "bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/20 active:scale-95"
             )}
           >
-            Analyze Email
+            {isAnalyzing ? 'Analyzing...' : 'Analyze Email'}
           </button>
         </div>
       </motion.div>
+
 
       {/* Output Side */}
       <div className="flex flex-col gap-6">

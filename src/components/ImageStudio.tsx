@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, Image as ImageIcon, Sparkles, Download, Loader2, Wand2, Eraser, Layers, Palette, Camera, Grid } from 'lucide-react';
+import { Upload, Image as ImageIcon, Sparkles, Download, Loader2, Wand2, Eraser, Layers, Palette, Camera, Grid, Trash2, Send } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { transformImage } from '../services/gemini';
 import { cn } from '../lib/utils';
@@ -12,8 +12,6 @@ const STYLES = [
   { id: 'nobg', label: 'Remove BG', icon: Eraser, prompt: 'Remove the background and place the subject on a clean, professional studio background.' },
   { id: 'enhance', label: 'Enhance', icon: Wand2, prompt: 'Enhance details, lighting, and colors while maintaining the original subject.' },
 ];
-
-import { Send } from 'lucide-react';
 
 export const ImageStudio: React.FC = () => {
   const [image, setImage] = useState<string | null>(null);
@@ -33,6 +31,13 @@ export const ImageStudio: React.FC = () => {
       };
       reader.readAsDataURL(file);
     }
+  };
+
+  const clearSession = () => {
+    setImage(null);
+    setMimeType('');
+    setPrompt('');
+    setResult(null);
   };
 
   const processImg = async (stylePrompt?: string) => {
@@ -63,10 +68,21 @@ export const ImageStudio: React.FC = () => {
         {/* Sidebar: Controls */}
         <div className="lg:col-span-2 flex flex-col gap-6">
           <div className="glass-card p-6 flex flex-col gap-6">
-            <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 flex items-center gap-2">
-              <Layers className="w-3 h-3" />
-              Source Image
-            </h3>
+            <div className="flex items-center justify-between">
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 flex items-center gap-2">
+                <Layers className="w-3 h-3" />
+                Source Image
+              </h3>
+              {image && (
+                <button 
+                  onClick={clearSession}
+                  className="text-[10px] font-bold text-red-400/60 hover:text-red-400 transition-colors uppercase tracking-widest flex items-center gap-1"
+                >
+                  <Trash2 className="w-3 h-3" />
+                  Reset
+                </button>
+              )}
+            </div>
             
             <div 
               onClick={() => fileInputRef.current?.click()}
@@ -74,6 +90,7 @@ export const ImageStudio: React.FC = () => {
                 "relative aspect-video rounded-xl border border-white/5 flex flex-col items-center justify-center cursor-pointer transition-all overflow-hidden bg-black/20 group",
                 image ? "border-brand-primary/50" : "hover:border-white/20"
               )}
+              aria-label="Upload image"
             >
               <input 
                 type="file" 
@@ -83,7 +100,12 @@ export const ImageStudio: React.FC = () => {
                 className="hidden" 
               />
               {image ? (
-                <img src={image} className="w-full h-full object-cover transition-transform group-hover:scale-105" alt="Source" />
+                <div className="relative w-full h-full">
+                  <img src={image} className="w-full h-full object-cover transition-transform group-hover:scale-105" alt="Source" />
+                  <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
+                    <span className="text-xs font-bold text-white uppercase tracking-widest">Change Image</span>
+                  </div>
+                </div>
               ) : (
                 <div className="flex flex-col items-center gap-2 text-slate-500">
                   <Upload className="w-6 h-6 opacity-50" />
@@ -104,6 +126,7 @@ export const ImageStudio: React.FC = () => {
                     disabled={!image || isProcessing}
                     onClick={() => processImg(style.prompt)}
                     className="flex flex-col items-center gap-2 p-3 rounded-lg bg-white/5 border border-white/5 hover:bg-white/10 hover:border-white/20 transition-all disabled:opacity-50 disabled:cursor-not-allowed group glass-hover"
+                    aria-label={`Apply ${style.label} style`}
                   >
                     <style.icon className="w-4 h-4 group-hover:scale-110 transition-transform text-blue-400" />
                     <span className="text-[9px] font-bold uppercase tracking-tight">{style.label}</span>
@@ -124,11 +147,13 @@ export const ImageStudio: React.FC = () => {
                   onChange={(e) => setPrompt(e.target.value)}
                   placeholder="Type instructions..."
                   className="flex-1 bg-black/20 border border-white/5 rounded-lg px-4 py-2 text-xs focus:outline-none focus:border-brand-primary transition-all placeholder:text-slate-600"
+                  aria-label="Custom image remix instruction"
                 />
                 <button
                   onClick={() => processImg()}
                   disabled={!image || isProcessing || !prompt.trim()}
                   className="px-4 bg-blue-600 hover:bg-blue-500 text-white rounded-lg disabled:opacity-50 transition-colors shadow-lg shadow-blue-600/10"
+                  aria-label="Process custom instruction"
                 >
                   <Send className="w-4 h-4" />
                 </button>
@@ -136,6 +161,7 @@ export const ImageStudio: React.FC = () => {
             </div>
           </div>
         </div>
+
 
         {/* Main: Preview */}
         <div className="lg:col-span-3 glass-card flex flex-col">

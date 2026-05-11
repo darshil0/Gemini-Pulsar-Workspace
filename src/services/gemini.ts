@@ -7,7 +7,6 @@ const getAI = () => {
   if (!genAIInstance) {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      // In a real app we'd handle this better, but for this dev env it's injected
       console.warn("GEMINI_API_KEY is not set.");
     }
     genAIInstance = new GoogleGenAI({ apiKey: apiKey || '' });
@@ -112,7 +111,6 @@ export const connectLiveVoice = (callbacks: any) => {
   const ai = getAI();
   return ai.live.connect({
     model: "gemini-3.1-flash-live-preview",
-    callbacks,
     config: {
       responseModalities: [Modality.AUDIO],
       speechConfig: {
@@ -120,6 +118,9 @@ export const connectLiveVoice = (callbacks: any) => {
       },
       systemInstruction: "You are Pulsar, a helpful voice assistant. Keep responses concise and natural for conversation.",
       outputAudioTranscription: {},
-    }
+    },
+    ...callbacks
   });
 };
+
+
