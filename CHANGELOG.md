@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.2.0] - 2024-05-11
+### Added
+- Implemented "Clear" and "Reset" functionality in Email Helper and Image Studio for better session control.
+- Added 24kHz mono PCM audio playback support in the Vocal Workspace.
+- Integrated `audioContext.resume()` to handle browser auto-play restrictions.
+
+### Changed
+- Hardened Gemini services with comprehensive try-catch blocks and error logging.
+- Refined Vocal Workspace UI with a dedicated Transcription panel and improved status indicators.
+- Optimized audio streaming pipeline for better stability and lower latency.
+- Enhanced layout responsiveness and accessibility (ARIA labels) across all modules.
+
+### Fixed
+- Corrected Google GenAI SDK `connect` signature for Live API compatibility.
+- Resolved transcription data binding issues in the Live Voice hook.
+- Fixed potential null pointer exceptions during audio context cleanup.
+
 ## [1.1.0] - 2024-05-11
 ### Added
 - Created `README.md` and `CHANGELOG.md` for better project documentation.
