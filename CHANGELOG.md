@@ -1,11 +1,11 @@
-# Changelog
+# Changelog - Google Pulsar Workspace
 
 All notable changes to this project will be documented in this file.
 
 ## [1.3.0] - 2024-05-11
 ### Added
 - Implemented **Adaptive Jitter Buffer** (150ms lookahead) for ultra-smooth 24kHz audio playback.
-- Added **Orbital Frequency Visualizer** in Vocal Workspace for real-time engagement feedback.
+- Added **Orbital Frequency Visualizer** and real-time **Status Indicators** (Jitter Buffer Active) in Vocal Workspace.
 - Integrated `URL.createObjectURL` and `revokeObjectURL` for optimized image memory management in Image Studio.
 - Implemented **Email Helper Session History** with `localStorage` persistence and a 24-hour auto-purge (TTL) for privacy compliance.
 - Added "Clear All" history functionality for user data control in Email Helper.
@@ -58,7 +58,7 @@ All notable changes to this project will be documented in this file.
 
 ## [1.0.0] - 2024-05-11
 ### Added
-- Initial release of Gemini Pulsar Workspace.
+- Initial release of Google Pulsar Workspace.
 - Core Email Helper module with JSON schema-based analysis.
 - Core Image Studio with Gemini vision capabilities.
 - Core Vocal Workspace with real-time multi-modal connectivity.

@@ -1,4 +1,4 @@
-# Gemini Pulsar Workspace
+# Google Pulsar Workspace
 
 A high-performance AI dashboard featuring an intelligent email assistant, generative image studio, and a real-time vocal workspace powered by Gemini.
 

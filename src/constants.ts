@@ -1,5 +1,5 @@
 /**
- * Application constants for Gemini Pulsar Workspace
+ * Application constants for Google Pulsar Workspace
  */
 
 export const MODELS = {

@@ -1,7 +1,7 @@
 import { LiveServerMessage } from "@google/genai";
 
 /**
- * Core type definitions for Gemini Pulsar Workspace
+ * Core type definitions for Google Pulsar Workspace
  */
 
 export type Priority = 'low' | 'medium' | 'high' | 'urgent';
