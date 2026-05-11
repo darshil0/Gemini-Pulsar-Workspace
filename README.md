@@ -1,20 +1,31 @@
-<div align="center">
-<img width="1200" height="475" alt="GHBanner" src="https://github.com/user-attachments/assets/0aa67016-6eaf-458a-adb2-6e31a0763ed6" />
-</div>
+# Gemini Pulsar Workspace
 
-# Run and deploy your AI Studio app
+A high-performance AI dashboard featuring an intelligent email assistant, generative image studio, and a real-time vocal workspace powered by Gemini.
 
-This contains everything you need to run your app locally.
+## 🚀 Features
 
-View your app in AI Studio: https://ai.studio/apps/81c1be66-0314-45a5-aa0f-cd4c9c7b388e
+- **Email Helper**: Multi-layered analysis of incoming threads including category detection, priority calculation, and tone sentiment. Generates professional drafts in seconds.
+- **Image Studio**: Upload and remix assets using vision-guided instructions and preset styles. Powered by Gemini 2.5 Flash Image.
+- **Vocal Workspace**: Low-latency, streaming voice interaction with real-time transcription and visual frequency feedback.
+- **Modern UI**: Polished "Clean Minimalism" theme with glassmorphism effects, fluid animations, and a responsive bento-grid layout.
 
-## Run Locally
+## 🛠️ Tech Stack
 
-**Prerequisites:**  Node.js
+- **Framework**: React 18 + Vite
+- **Styling**: Tailwind CSS 4
+- **Animation**: Framer Motion (motion/react)
+- **AI Backend**: Google GenAI SDK (Gemini 3 Flash & Gemini 2.5 Flash Image)
+- **Icons**: Lucide React
 
+## 🚥 Getting Started
 
-1. Install dependencies:
-   `npm install`
-2. Set the `GEMINI_API_KEY` in [.env.local](.env.local) to your Gemini API key
-3. Run the app:
-   `npm run dev`
+1. Set your `GEMINI_API_KEY` in the environment variables.
+2. The app automatically verifies your connection state in the dashboard.
+3. Switch between tabs to explore different AI capabilities.
+
+## 🏗️ Architecture
+
+- `/src/components`: UI modules for Email, Image, and Voice.
+- `/src/hooks`: Custom logic for Web Audio and Real-time streaming.
+- `/src/services`: Integration layer for the Gemini API.
+- `/src/index.css`: Global design system and glassmorphism utilities.
