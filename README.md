@@ -17,28 +17,30 @@ A high-performance AI dashboard featuring an intelligent email assistant, genera
 
 ## 🛠️ Technical Implementation Details
 
-### 1. Adaptive Jitter Buffer (Audio)
+### 1. Adaptive Jitter Buffer & Interruption Logic (Audio)
 To handle 24kHz PCM audio streams over WebSockets, the `useAudioLive` hook implements a custom jitter management strategy:
 - **Lookahead**: 150ms buffer to absorb network latency spikes.
 - **Drift Correction**: Automatically re-syncs the `playTime` if the audio clock drifts more than 1 second from the server output.
-- **Sample Rates**: Managed at 16kHz for input (microphone) and 24kHz for model output playback.
+- **Hard Interruption**: Uses an `activeSourcesRef` to immediately kill all scheduled `AudioBufferSourceNode` playbacks when an interruption signal is received, preventing "overlapping voices."
 
 ### 2. Privacy & Transient History
 The Email Helper implements a "Transient Persistence" model:
 - **Pruning**: Automatically removes history entries older than 24 hours.
 - **Local Isolation**: All history is stored in `localStorage`, remaining strictly within the user's browser environment.
-- **PII Scrubbing**: Error logs are filtered to prevent sensitive email content from leaking into browser consoles or external telemetry.
+- **PII Scrubbing**: Error logs are filtered to prevent sensitive email content from leaking into browser consoles.
 
-### 3. Binary Asset Optimization
+### 3. Binary Asset Optimization & Safety
 The Image Studio uses a lazy-loading and proactive cleanup pattern:
-- **Memory Safety**: Every uploaded or generated image URL is created via `URL.createObjectURL` and explicitly destroyed via `URL.revokeObjectURL` when the session is cleared or the image is replaced.
-- **Vision Integration**: Optimized for `gemini-2.5-flash-image` to provide high-fidelity remixing with minimal token overhead.
+- **Memory Safety**: Every uploaded or generated image URL is created via `URL.createObjectURL` and explicitly destroyed via `URL.revokeObjectURL` when the session is cleared or the image is replaced to prevent memory leaks in long sessions.
+- **Error Boundaries**: Comprehensive error handling for image analysis failures with detailed UI feedback.
 
 ## 🛠️ Tech Stack
 
 - **Framework**: React 18 + Vite
-- **Styling**: Tailwind CSS 4 (using `@import "tailwindcss";` pattern)
+- **Styling**: Tailwind CSS 4
 - **Animation**: Framer Motion (`motion/react`)
+- **Data Viz**: D3.js + Recharts
+- **Utilities**: Date-fns
 - **AI Backend**: Google GenAI SDK
     - **Processing**: `gemini-3-flash-preview`
     - **Vision**: `gemini-2.5-flash-image`

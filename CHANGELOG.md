@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.1] - 2024-05-11
+### Added
+- Integrated **D3.js** and **Recharts** for future data visualization capabilities.
+- Added adaptive scaling for the **Orbital Visualizer** in Vocal Workspace, improving responsiveness to different screen sizes.
+
+### Changed
+- Unified Branding: Migrated all references from "Gemini Pulsar" to **"Google Pulsar Workspace"**.
+- Optimized UI: Added smoother tab transitions using `motion.div` with `layoutId` for spring-based active indicators.
+- Improved Image Studio: Unified image processing state and added a robust error boundary UI for failed transformations.
+
+### Fixed
+- **Audio Memory Leak**: Resolved "Zombie Audio" issue by stopping and clearing `AudioBufferSourceNode` references on disconnection or model interruption.
+- **Interruption Logic**: Fixed a bug where audio playback would continue after the model sent an `interrupted` signal.
+- **Copy Feedback**: Fixed lack of visual confirmation when copying draft replies in Email Helper.
+
 ## [1.3.0] - 2024-05-11
 ### Added
 - Implemented **Adaptive Jitter Buffer** (150ms lookahead) for ultra-smooth 24kHz audio playback.
