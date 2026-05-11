@@ -14,6 +14,7 @@ export const EmailHelper: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<EmailAnalysis | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isCopied, setIsCopied] = useState(false);
   const [history, setHistory] = useState<EmailAnalysis[]>(() => {
     try {
       const saved = localStorage.getItem('email_analysis_history');
@@ -66,10 +67,13 @@ export const EmailHelper: React.FC = () => {
     setInput('');
     setResult(null);
     setError(null);
+    setIsCopied(false);
   };
 
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
+    setIsCopied(true);
+    setTimeout(() => setIsCopied(false), 2000);
   };
 
   return (
@@ -82,19 +86,19 @@ export const EmailHelper: React.FC = () => {
       >
         <div className="flex-1 glass-card p-5 flex flex-col relative group/input">
           <div className="flex items-center justify-between mb-4">
-            <label className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Input Content</label>
+            <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Input Content</label>
             <div className="flex items-center gap-3">
               {input && (
                 <button 
-                  onClick={clearInput}
-                  className="text-[10px] font-bold text-red-400/60 hover:text-red-400 transition-colors uppercase tracking-widest flex items-center gap-1"
-                  aria-label="Clear input"
+                   onClick={clearInput}
+                   className="text-xs font-bold text-red-400/60 hover:text-red-400 transition-colors uppercase tracking-widest flex items-center gap-1"
+                   aria-label="Clear input"
                 >
                   <Trash2 className="w-3 h-3" />
                   Clear
                 </button>
               )}
-              <span className="text-[10px] bg-white/5 opacity-50 px-2 py-1 rounded font-mono">
+              <span className="text-xs bg-white/5 opacity-50 px-2 py-1 rounded font-mono">
                 {input.length} CHARS
               </span>
             </div>
@@ -134,7 +138,7 @@ export const EmailHelper: React.FC = () => {
           {history.length > 0 && (
             <div className="pt-4 border-t border-white/5">
               <div className="flex items-center justify-between mb-2">
-                <h4 className="text-[9px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
                   <Clock className="w-3 h-3" /> Recent History
                 </h4>
                 <button 
@@ -142,7 +146,7 @@ export const EmailHelper: React.FC = () => {
                     localStorage.removeItem('email_analysis_history');
                     setHistory([]);
                   }}
-                  className="text-[9px] font-bold text-slate-500 hover:text-red-400 transition-colors uppercase tracking-widest"
+                  className="text-[10px] font-bold text-slate-500 hover:text-red-400 transition-colors uppercase tracking-widest"
                 >
                   Clear All
                 </button>
@@ -153,13 +157,15 @@ export const EmailHelper: React.FC = () => {
                     key={idx}
                     onClick={() => selectFromHistory(item)}
                     className={cn(
-                      "flex-shrink-0 px-3 py-2 rounded-lg text-[10px] font-medium border transition-all",
+                      "flex-shrink-0 px-3 py-2 rounded-lg text-[10px] font-bold border transition-all",
                       result === item 
                         ? "bg-blue-500/20 border-blue-500/40 text-blue-300"
                         : "bg-white/5 border-white/5 text-slate-400 hover:bg-white/10 hover:text-white"
                     )}
                   >
-                    {item.category} ({item.priority})
+                    <span className="capitalize">{item.category}</span>
+                    <span className="mx-1 opacity-30">|</span>
+                    <span className="uppercase text-[9px] opacity-60">{item.priority}</span>
                   </button>
                 ))}
               </div>
@@ -267,14 +273,21 @@ export const EmailHelper: React.FC = () => {
                   <div className="flex gap-2">
                     <button 
                       onClick={() => copyToClipboard(result.draftReply)}
-                      className="text-[10px] font-bold bg-white/5 text-slate-400 px-3 py-1.5 rounded-lg hover:text-white glass-hover transition-colors uppercase tracking-widest"
+                      className={cn(
+                        "text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all uppercase tracking-widest flex items-center gap-1.5",
+                        isCopied 
+                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" 
+                          : "bg-white/5 text-slate-400 hover:text-white glass-hover"
+                      )}
                     >
-                      Copy
+                      {isCopied ? <CheckCircle2 className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                      {isCopied ? 'Copied' : 'Copy'}
                     </button>
                     <button 
                       onClick={handleAnalyze}
-                      className="text-[10px] font-bold bg-white/5 text-slate-400 px-3 py-1.5 rounded-lg hover:text-white glass-hover transition-colors uppercase tracking-widest"
+                      className="text-[10px] font-bold bg-white/5 text-slate-400 px-3 py-1.5 rounded-lg hover:text-white glass-hover transition-colors uppercase tracking-widest flex items-center gap-1.5"
                     >
+                      <Sparkles className="w-3 h-3" />
                       Regenerate
                     </button>
                   </div>

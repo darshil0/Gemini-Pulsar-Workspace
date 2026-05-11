@@ -18,6 +18,7 @@ export const useAudioLive = () => {
   const processorRef = useRef<ScriptProcessorNode | null>(null);
   const sessionRef = useRef<any>(null); 
   const analyserRef = useRef<AnalyserNode | null>(null);
+  const activeSourcesRef = useRef<AudioBufferSourceNode[]>([]);
 
   const nextPlayTimeRef = useRef<number>(0);
 
@@ -41,6 +42,11 @@ export const useAudioLive = () => {
       processorRef.current.disconnect();
       processorRef.current = null;
     }
+    activeSourcesRef.current.forEach(s => {
+      try { s.stop(); } catch(e) {}
+    });
+    activeSourcesRef.current = [];
+    
     if (audioContextRef.current) {
       audioContextRef.current.close().catch(console.error);
       audioContextRef.current = null;
@@ -49,6 +55,19 @@ export const useAudioLive = () => {
     setIsConnecting(false);
     nextPlayTimeRef.current = 0;
   }, []);
+
+  /**
+   * Efficiently converts Uint8Array to Base64.
+   */
+  const arrayBufferToBase64 = (buffer: ArrayBuffer) => {
+    let binary = '';
+    const bytes = new Uint8Array(buffer);
+    const len = bytes.byteLength;
+    for (let i = 0; i < len; i++) {
+        binary += String.fromCharCode(bytes[i]);
+    }
+    return window.btoa(binary);
+  };
 
   /**
    * Initializes the AudioContext, requests mic permissions, and connects to the Live service.
@@ -117,6 +136,12 @@ export const useAudioLive = () => {
               source.buffer = buffer;
               source.connect(audioContextRef.current.destination);
               
+              // Track active sources to handle interruptions
+              activeSourcesRef.current.push(source);
+              source.onended = () => {
+                activeSourcesRef.current = activeSourcesRef.current.filter(s => s !== source);
+              };
+
               // Adaptive Jitter Buffer logic
               // We maintain a 150ms lookahead to absorb network jitter
               const now = audioContextRef.current.currentTime;
@@ -136,6 +161,11 @@ export const useAudioLive = () => {
           }
 
           if (message.serverContent?.interrupted) {
+            // Stop all current audio immediately on interruption
+            activeSourcesRef.current.forEach(s => {
+              try { s.stop(); } catch(e) {}
+            });
+            activeSourcesRef.current = [];
             nextPlayTimeRef.current = audioContextRef.current?.currentTime || 0;
           }
         },
@@ -160,12 +190,7 @@ export const useAudioLive = () => {
           pcm16[i] = Math.max(-1, Math.min(1, inputData[i])) * 0x7FFF;
         }
         
-        const uint8 = new Uint8Array(pcm16.buffer);
-        let binary = '';
-        for (let i = 0; i < uint8.length; i++) {
-          binary += String.fromCharCode(uint8[i]);
-        }
-        const base64 = btoa(binary);
+        const base64 = arrayBufferToBase64(pcm16.buffer);
         
         try {
           sessionRef.current.sendRealtimeInput({

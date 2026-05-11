@@ -1,5 +1,5 @@
 import React, { useState, useRef } from 'react';
-import { Upload, Image as ImageIcon, Sparkles, Download, Loader2, Wand2, Eraser, Layers, Palette, Camera, Grid, Trash2, Send } from 'lucide-react';
+import { Upload, Image as ImageIcon, Sparkles, Download, Loader2, Wand2, Eraser, Layers, Palette, Camera, Grid, Trash2, Send, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { transformImage } from '../services/gemini';
 import { cn } from '../lib/utils';
@@ -20,11 +20,15 @@ export const ImageStudio: React.FC = () => {
   const [prompt, setPrompt] = useState('');
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<ImageTransformationResult | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const imageBase64Ref = useRef<string | null>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      setError(null);
       // Clear previous object URL if it exists to prevent memory leaks
       if (image && image.startsWith('blob:')) {
         URL.revokeObjectURL(image);
@@ -36,9 +40,9 @@ export const ImageStudio: React.FC = () => {
       
       const reader = new FileReader();
       reader.onload = () => {
-        // We'll store the base64 in a ref for the API call
-        (window as any)._lastImageBase64 = reader.result as string;
+        imageBase64Ref.current = reader.result as string;
       };
+      reader.onerror = () => setError("Failed to read image file.");
       reader.readAsDataURL(file);
     }
   };
@@ -51,18 +55,21 @@ export const ImageStudio: React.FC = () => {
     setMimeType('');
     setPrompt('');
     setResult(null);
-    (window as any)._lastImageBase64 = null;
+    setError(null);
+    imageBase64Ref.current = null;
   };
 
   const processImg = async (stylePrompt?: string) => {
-    const imageBase64 = (window as any)._lastImageBase64;
-    if (!imageBase64) return;
+    const b64 = imageBase64Ref.current;
+    if (!b64) return;
     setIsProcessing(true);
+    setError(null);
     try {
-      const data = await transformImage(imageBase64, mimeType, stylePrompt || prompt);
+      const data = await transformImage(b64, mimeType, stylePrompt || prompt);
       setResult(data);
     } catch (err) {
-      console.error("Image transformation failed. Ensure image size is within limits.");
+      setError("Image transformation failed. Ensure image size is within limits (max 4MB).");
+      console.error(err);
     } finally {
       setIsProcessing(false);
     }
@@ -201,7 +208,24 @@ export const ImageStudio: React.FC = () => {
 
           <div className="flex-1 flex flex-col p-6 items-center justify-center relative min-h-[300px]">
             <AnimatePresence mode="wait">
-              {isProcessing ? (
+              {error ? (
+                <motion.div 
+                  key="error"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex flex-col items-center gap-4 text-red-500"
+                >
+                  <AlertCircle className="w-12 h-12" />
+                  <p className="text-sm font-medium">{error}</p>
+                  <button 
+                    onClick={clearSession}
+                    className="mt-2 text-xs uppercase tracking-widest font-bold underline underline-offset-4"
+                  >
+                    Reset & Try Again
+                  </button>
+                </motion.div>
+              ) : isProcessing ? (
                 <motion.div 
                   key="loading"
                   initial={{ opacity: 0 }}

@@ -35,13 +35,13 @@ export const VocalWorkspace: React.FC = () => {
       
       const centerX = canvas.width / 2;
       const centerY = canvas.height / 2;
-      const radius = 45;
+      const radius = canvas.width * 0.35;
       
       // Draw circular frequency bars
       for (let i = 0; i < bufferLength; i += 2) {
         const value = dataArray[i];
         const percent = value / 255;
-        const barHeight = percent * 20;
+        const barHeight = percent * (canvas.width * 0.15);
         const angle = (i / bufferLength) * Math.PI * 2;
         
         const x1 = centerX + Math.cos(angle) * radius;
@@ -49,8 +49,9 @@ export const VocalWorkspace: React.FC = () => {
         const x2 = centerX + Math.cos(angle) * (radius + barHeight);
         const y2 = centerY + Math.sin(angle) * (radius + barHeight);
         
-        ctx.strokeStyle = `rgba(59, 130, 246, ${percent + 0.2})`;
+        ctx.strokeStyle = `rgba(59, 130, 246, ${percent + 0.3})`;
         ctx.lineWidth = 2;
+        ctx.lineCap = 'round';
         ctx.beginPath();
         ctx.moveTo(x1, y1);
         ctx.lineTo(x2, y2);
@@ -59,10 +60,10 @@ export const VocalWorkspace: React.FC = () => {
       
       // Draw an inner pulse
       const avg = dataArray.reduce((acc, v) => acc + v, 0) / bufferLength;
-      const innerRadius = radius * (1 + (avg / 255) * 0.2);
+      const innerPulseRadius = radius * (1 + (avg / 255) * 0.1);
       ctx.beginPath();
-      ctx.arc(centerX, centerY, innerRadius, 0, Math.PI * 2);
-      ctx.strokeStyle = `rgba(59, 130, 246, 0.1)`;
+      ctx.arc(centerX, centerY, innerPulseRadius, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(59, 130, 246, 0.2)`;
       ctx.lineWidth = 1;
       ctx.stroke();
     };
@@ -105,23 +106,23 @@ export const VocalWorkspace: React.FC = () => {
             onClick={isActive ? stop : start}
             disabled={isConnecting}
             className={cn(
-              "relative w-32 h-32 rounded-full flex items-center justify-center transition-all duration-500 shadow-2xl overflow-hidden glass",
+              "relative w-48 h-48 rounded-full flex items-center justify-center transition-all duration-500 shadow-2xl overflow-hidden glass",
               isActive ? "border-2 border-blue-500/50 shadow-blue-500/20" : "hover:border-white/20 border border-white/5"
             )}
           >
             <AnimatePresence mode="wait">
               {isConnecting ? (
                 <motion.div key="connecting" initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }}>
-                  <Waves className="w-12 h-12 text-blue-400 animate-pulse" />
+                  <Waves className="w-16 h-16 text-blue-400 animate-pulse" />
                 </motion.div>
               ) : isActive ? (
                 <motion.div key="active" initial={{ scale: 0.5 }} animate={{ scale: 1 }} className="flex flex-col items-center">
-                  <Mic className="w-10 h-10 text-blue-400 mb-1" />
+                  <Mic className="w-12 h-12 text-blue-400 mb-1" />
                   <span className="text-[10px] font-bold uppercase tracking-widest text-blue-400">Live</span>
                 </motion.div>
               ) : (
                 <motion.div key="inactive" initial={{ scale: 0.5 }} animate={{ scale: 1 }}>
-                  <MicOff className="w-10 h-10 text-slate-600" />
+                  <MicOff className="w-12 h-12 text-slate-600" />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -129,9 +130,9 @@ export const VocalWorkspace: React.FC = () => {
             {/* Visualizer overlay */}
             <canvas 
               ref={canvasRef} 
-              width={128} 
-              height={128} 
-              className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-40"
+              width={384} 
+              height={384} 
+              className="absolute inset-0 pointer-events-none mix-blend-overlay opacity-80"
             />
           </button>
         </motion.div>
@@ -160,13 +161,20 @@ export const VocalWorkspace: React.FC = () => {
           <motion.div
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
-            className="w-full max-w-md glass p-6 rounded-2xl text-left mb-8 max-h-48 overflow-y-auto scrollbar-hide"
+            className="w-full max-w-lg glass p-6 rounded-2xl text-left mb-8 max-h-48 overflow-y-auto scrollbar-hide border border-blue-500/10 shadow-lg shadow-blue-500/5"
           >
-            <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-2 flex items-center gap-2">
-              <MessageSquare className="w-3 h-3" />
-              Live Transcription
-            </h4>
-            <p className="text-sm text-slate-300 leading-relaxed italic">
+            <div className="flex items-center justify-between mb-4 border-b border-white/5 pb-2">
+              <h4 className="text-[10px] font-bold uppercase tracking-widest text-blue-400 flex items-center gap-2">
+                <MessageSquare className="w-3.5 h-3.5" />
+                Live Context Stream
+              </h4>
+              <div className="flex gap-1">
+                <div className="w-1 h-1 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '0ms' }} />
+                <div className="w-1 h-1 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '200ms' }} />
+                <div className="w-1 h-1 rounded-full bg-blue-500 animate-bounce" style={{ animationDelay: '400ms' }} />
+              </div>
+            </div>
+            <p className="text-sm text-slate-200 leading-relaxed font-medium">
               {transcription}
             </p>
             <div ref={transcriptionEndRef} />

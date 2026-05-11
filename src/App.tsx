@@ -52,23 +52,30 @@ export default function App() {
               <Sparkles className="w-6 h-6 animate-pulse" />
             </div>
             <div>
-              <h1 className="text-2xl font-bold tracking-tight">Gemini Pulsar</h1>
-              <p className="text-xs font-medium tracking-[0.2em] uppercase opacity-50">Advanced AI Workspace</p>
+              <h1 className="text-2xl font-bold tracking-tight">Google Pulsar</h1>
+              <p className="text-xs font-medium tracking-[0.2em] uppercase opacity-50">High-Performance Workspace</p>
             </div>
           </div>
 
-          <nav className="flex gap-2 bg-black/20 p-1.5 rounded-xl border border-white/5">
+          <nav className="flex gap-2 bg-black/20 p-1.5 rounded-xl border border-white/5 relative">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as ActiveTab)}
                 className={cn(
-                  "px-5 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-all transition-colors duration-200",
+                  "relative px-5 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-all duration-200 z-10",
                   activeTab === tab.id 
-                    ? "active-tab" 
-                    : "text-slate-400 glass-hover"
+                    ? "text-blue-400" 
+                    : "text-slate-400 hover:text-white"
                 )}
               >
+                {activeTab === tab.id && (
+                  <motion.div
+                    layoutId="active-tab-bg"
+                    className="absolute inset-0 bg-blue-500/10 border border-blue-500/30 rounded-lg -z-10"
+                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                  />
+                )}
                 <tab.icon className="w-4 h-4" />
                 <span className="hidden sm:inline">{tab.label}</span>
               </button>
