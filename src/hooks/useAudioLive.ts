@@ -104,7 +104,18 @@ export const useAudioLive = () => {
               source.buffer = buffer;
               source.connect(audioContextRef.current.destination);
               
-              const startTime = Math.max(audioContextRef.current.currentTime, nextPlayTimeRef.current);
+              // Adaptive Jitter Buffer logic
+              // We maintain a 150ms lookahead to absorb network jitter
+              const now = audioContextRef.current.currentTime;
+              const lookahead = 0.15; 
+              
+              let startTime = nextPlayTimeRef.current;
+              
+              // If we've drifted too far or are just starting, reset to now + lookahead
+              if (startTime < now || startTime > now + 1.0) {
+                startTime = now + lookahead;
+              }
+              
               source.start(startTime);
               nextPlayTimeRef.current = startTime + buffer.duration;
             } catch (e) {

@@ -2,6 +2,21 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.3.0] - 2024-05-11
+### Added
+- Implemented **Adaptive Jitter Buffer** (150ms lookahead) for ultra-smooth 24kHz audio playback.
+- Added **Orbital Frequency Visualizer** in Vocal Workspace for real-time engagement feedback.
+- Integrated `URL.createObjectURL` and `revokeObjectURL` for optimized image memory management in Image Studio.
+
+### Changed
+- Hardened Error Logging: Stripped PII from transformation error logs to ensure privacy.
+- Enhanced "Clear" functionality: Explicitly resetting internal base64 buffers and revoking binary resources.
+- Optimized canvas rendering loop with circular geometry for the active Pulsar state.
+
+### Fixed
+- Resolved audio drifting issues during long-form Gemini live sessions.
+- Fixed memory leakage vulnerability during rapid image re-uploads.
+
 ## [1.2.0] - 2024-05-11
 ### Added
 - Implemented "Clear" and "Reset" functionality in Email Helper and Image Studio for better session control.

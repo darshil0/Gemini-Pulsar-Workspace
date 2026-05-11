@@ -33,17 +33,38 @@ export const VocalWorkspace: React.FC = () => {
 
       ctx.clearRect(0, 0, canvas.width, canvas.height);
       
-      const barWidth = (canvas.width / bufferLength) * 2.5;
-      let x = 0;
-
-      for (let i = 0; i < bufferLength; i++) {
-        const barHeight = (dataArray[i] / 255) * canvas.height;
+      const centerX = canvas.width / 2;
+      const centerY = canvas.height / 2;
+      const radius = 45;
+      
+      // Draw circular frequency bars
+      for (let i = 0; i < bufferLength; i += 2) {
+        const value = dataArray[i];
+        const percent = value / 255;
+        const barHeight = percent * 20;
+        const angle = (i / bufferLength) * Math.PI * 2;
         
-        ctx.fillStyle = `rgba(59, 130, 246, ${dataArray[i] / 255 + 0.1})`;
-        ctx.fillRect(x, canvas.height - barHeight, barWidth, barHeight);
-
-        x += barWidth + 1;
+        const x1 = centerX + Math.cos(angle) * radius;
+        const y1 = centerY + Math.sin(angle) * radius;
+        const x2 = centerX + Math.cos(angle) * (radius + barHeight);
+        const y2 = centerY + Math.sin(angle) * (radius + barHeight);
+        
+        ctx.strokeStyle = `rgba(59, 130, 246, ${percent + 0.2})`;
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
       }
+      
+      // Draw an inner pulse
+      const avg = dataArray.reduce((acc, v) => acc + v, 0) / bufferLength;
+      const innerRadius = radius * (1 + (avg / 255) * 0.2);
+      ctx.beginPath();
+      ctx.arc(centerX, centerY, innerRadius, 0, Math.PI * 2);
+      ctx.strokeStyle = `rgba(59, 130, 246, 0.1)`;
+      ctx.lineWidth = 1;
+      ctx.stroke();
     };
 
     draw();

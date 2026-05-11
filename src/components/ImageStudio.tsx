@@ -24,30 +24,45 @@ export const ImageStudio: React.FC = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      // Clear previous object URL if it exists to prevent memory leaks
+      if (image && image.startsWith('blob:')) {
+        URL.revokeObjectURL(image);
+      }
+      
+      const objectUrl = URL.createObjectURL(file);
+      setImage(objectUrl);
+      setMimeType(file.type);
+      
+      // We still need base64 for the Gemini API
       const reader = new FileReader();
       reader.onload = () => {
-        setImage(reader.result as string);
-        setMimeType(file.type);
+        // We'll store the base64 in a ref for the API call
+        (window as any)._lastImageBase64 = reader.result as string;
       };
       reader.readAsDataURL(file);
     }
   };
 
   const clearSession = () => {
+    if (image && image.startsWith('blob:')) {
+      URL.revokeObjectURL(image);
+    }
     setImage(null);
     setMimeType('');
     setPrompt('');
     setResult(null);
+    (window as any)._lastImageBase64 = null;
   };
 
   const processImg = async (stylePrompt?: string) => {
-    if (!image) return;
+    const imageBase64 = (window as any)._lastImageBase64;
+    if (!imageBase64) return;
     setIsProcessing(true);
     try {
-      const data = await transformImage(image, mimeType, stylePrompt || prompt);
+      const data = await transformImage(imageBase64, mimeType, stylePrompt || prompt);
       setResult(data);
     } catch (err) {
-      console.error(err);
+      console.error("Image transformation failed. Ensure image size is within limits.");
     } finally {
       setIsProcessing(false);
     }
