@@ -7,7 +7,8 @@ All notable changes to this project will be documented in this file.
 - Implemented **Adaptive Jitter Buffer** (150ms lookahead) for ultra-smooth 24kHz audio playback.
 - Added **Orbital Frequency Visualizer** in Vocal Workspace for real-time engagement feedback.
 - Integrated `URL.createObjectURL` and `revokeObjectURL` for optimized image memory management in Image Studio.
-- Implemented **Email Helper Session History** to store and revisit the last 5 analyses in a transient local state.
+- Implemented **Email Helper Session History** with `localStorage` persistence and a 24-hour auto-purge (TTL) for privacy compliance.
+- Added "Clear All" history functionality for user data control in Email Helper.
 - Centralized **Types & Constants** (`/src/types.ts`, `/src/constants.ts`) for improved codebase stability and configuration.
 
 ### Changed

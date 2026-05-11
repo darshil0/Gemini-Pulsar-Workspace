@@ -14,7 +14,23 @@ export const EmailHelper: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<EmailAnalysis | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const [history, setHistory] = useState<EmailAnalysis[]>([]);
+  const [history, setHistory] = useState<EmailAnalysis[]>(() => {
+    try {
+      const saved = localStorage.getItem('email_analysis_history');
+      if (saved) {
+        const parsed = JSON.parse(saved);
+        // Filter out entries older than 24 hours
+        const now = Date.now();
+        const oneDay = 24 * 60 * 60 * 1000;
+        return (parsed as (EmailAnalysis & { timestamp?: number })[])
+          .filter(item => !item.timestamp || (now - item.timestamp < oneDay))
+          .map(({ timestamp, ...rest }) => rest);
+      }
+    } catch (e) {
+      console.error("Failed to load history", e);
+    }
+    return [];
+  });
 
   /**
    * Triggers the Gemini-powered analysis of the input email text.
@@ -26,7 +42,14 @@ export const EmailHelper: React.FC = () => {
     try {
       const data = await analyzeEmail(input);
       setResult(data);
-      setHistory(prev => [data, ...prev].slice(0, 5)); // Keep last 5
+      
+      setHistory(prev => {
+        const newHistory = [data, ...prev].slice(0, 5);
+        localStorage.setItem('email_analysis_history', JSON.stringify(
+          newHistory.map(item => ({ ...item, timestamp: Date.now() }))
+        ));
+        return newHistory;
+      });
     } catch (err) {
       setError('Failed to analyze email. Please try again.');
       console.error(err);
@@ -110,9 +133,20 @@ export const EmailHelper: React.FC = () => {
 
           {history.length > 0 && (
             <div className="pt-4 border-t border-white/5">
-              <h4 className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2">
-                <Clock className="w-3 h-3" /> Recent History
-              </h4>
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-[9px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                  <Clock className="w-3 h-3" /> Recent History
+                </h4>
+                <button 
+                  onClick={() => {
+                    localStorage.removeItem('email_analysis_history');
+                    setHistory([]);
+                  }}
+                  className="text-[9px] font-bold text-slate-500 hover:text-red-400 transition-colors uppercase tracking-widest"
+                >
+                  Clear All
+                </button>
+              </div>
               <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
                 {history.map((item, idx) => (
                   <button
