@@ -1,5 +1,5 @@
 import React, { useEffect, useRef } from 'react';
-import { Mic, MicOff, Waves, Volume2, Sparkles, MessageSquare, ExternalLink } from 'lucide-react';
+import { Mic, MicOff, Waves, Volume2, Sparkles, MessageSquare, ExternalLink, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { useAudioLive } from '../hooks/useAudioLive';
 import { cn } from '../lib/utils';
@@ -137,7 +137,7 @@ export const VocalWorkspace: React.FC = () => {
         </motion.div>
 
         {/* Status Indicators */}
-        <div className="mt-8 flex gap-4">
+        <div className="mt-8 flex flex-wrap justify-center gap-4">
           <div className="flex items-center gap-2 px-4 py-2 glass rounded-xl">
             <Volume2 className={cn("w-3.5 h-3.5", isActive ? "text-blue-400" : "text-slate-600")} />
             <span className="text-[9px] font-bold uppercase tracking-widest opacity-80">{isActive ? 'Receiving Audio' : 'Audio Disabled'}</span>
@@ -146,6 +146,12 @@ export const VocalWorkspace: React.FC = () => {
             <MessageSquare className={cn("w-3.5 h-3.5", isActive ? "text-purple-400" : "text-slate-600")} />
             <span className="text-[9px] font-bold uppercase tracking-widest opacity-80">{isActive ? 'Listening' : 'Stream Closed'}</span>
           </div>
+          {isActive && (
+            <div className="flex items-center gap-2 px-4 py-2 glass rounded-xl border-emerald-500/10">
+              <Zap className="w-3.5 h-3.5 text-emerald-400" />
+              <span className="text-[9px] font-bold uppercase tracking-widest text-emerald-400">150ms Jitter Buffer Active</span>
+            </div>
+          )}
         </div>
       </div>
 

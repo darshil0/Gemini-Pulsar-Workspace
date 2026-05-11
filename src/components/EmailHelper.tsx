@@ -14,6 +14,7 @@ export const EmailHelper: React.FC = () => {
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<EmailAnalysis | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [history, setHistory] = useState<EmailAnalysis[]>([]);
 
   /**
    * Triggers the Gemini-powered analysis of the input email text.
@@ -25,12 +26,17 @@ export const EmailHelper: React.FC = () => {
     try {
       const data = await analyzeEmail(input);
       setResult(data);
+      setHistory(prev => [data, ...prev].slice(0, 5)); // Keep last 5
     } catch (err) {
       setError('Failed to analyze email. Please try again.');
       console.error(err);
     } finally {
       setIsAnalyzing(false);
     }
+  };
+
+  const selectFromHistory = (item: EmailAnalysis) => {
+    setResult(item);
   };
 
   const clearInput = () => {
@@ -80,25 +86,51 @@ export const EmailHelper: React.FC = () => {
           />
         </div>
 
-        <div className="glass-card p-4 flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <div className={cn("w-2 h-2 rounded-full", isAnalyzing ? "bg-blue-500 animate-pulse" : "bg-neutral-600")}></div>
-            <span className="text-xs font-medium text-slate-500">
-              {isAnalyzing ? 'Gemini is analyzing context...' : 'Ready to analyze'}
-            </span>
+        <div className="glass-card p-4 flex flex-col gap-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-3">
+              <div className={cn("w-2 h-2 rounded-full", isAnalyzing ? "bg-blue-500 animate-pulse" : "bg-neutral-600")}></div>
+              <span className="text-xs font-medium text-slate-500">
+                {isAnalyzing ? 'Gemini is analyzing context...' : 'Ready to analyze'}
+              </span>
+            </div>
+            <button
+              onClick={handleAnalyze}
+              disabled={isAnalyzing || !input.trim()}
+              className={cn(
+                "px-6 py-2 rounded-xl text-sm font-bold shadow-lg transition-all",
+                isAnalyzing || !input.trim() 
+                  ? "bg-white/5 text-neutral-500 cursor-not-allowed" 
+                  : "bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/20 active:scale-95"
+              )}
+            >
+              {isAnalyzing ? 'Analyzing...' : 'Analyze Email'}
+            </button>
           </div>
-          <button
-            onClick={handleAnalyze}
-            disabled={isAnalyzing || !input.trim()}
-            className={cn(
-              "px-6 py-2 rounded-xl text-sm font-bold shadow-lg transition-all",
-              isAnalyzing || !input.trim() 
-                ? "bg-white/5 text-neutral-500 cursor-not-allowed" 
-                : "bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/20 active:scale-95"
-            )}
-          >
-            {isAnalyzing ? 'Analyzing...' : 'Analyze Email'}
-          </button>
+
+          {history.length > 0 && (
+            <div className="pt-4 border-t border-white/5">
+              <h4 className="text-[9px] font-bold text-slate-500 uppercase tracking-widest mb-2 flex items-center gap-2">
+                <Clock className="w-3 h-3" /> Recent History
+              </h4>
+              <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
+                {history.map((item, idx) => (
+                  <button
+                    key={idx}
+                    onClick={() => selectFromHistory(item)}
+                    className={cn(
+                      "flex-shrink-0 px-3 py-2 rounded-lg text-[10px] font-medium border transition-all",
+                      result === item 
+                        ? "bg-blue-500/20 border-blue-500/40 text-blue-300"
+                        : "bg-white/5 border-white/5 text-slate-400 hover:bg-white/10 hover:text-white"
+                    )}
+                  >
+                    {item.category} ({item.priority})
+                  </button>
+                ))}
+              </div>
+            </div>
+          )}
         </div>
       </motion.div>
 
