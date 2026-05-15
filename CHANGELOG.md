@@ -2,6 +2,19 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.1] - 2026-05-15
+### Added
+- **Security Checkpoint**: Implemented `/api/health` to allow the client to verify API key presence without exposing the key itself.
+
+### Fixed
+- **API Key Leak Prevention**: Removed unused `loadEnv` from `vite.config.ts` to prevent accidental key exposure during builds.
+- **Microphone Closure Bug**: Fixed a stale closure in `useAudioLive` that caused the microphone to disconnect incorrectly by using a `useRef` for connection state.
+- **Memory Leak (Binary)**: Added `URL.revokeObjectURL` for both the AudioWorklet script and transformed image assets to prevent browser storage exhaustion.
+- **History Highlighting**: Improved `EmailHelper` history tracking using unique timestamps for stable UI state and selection highlighting.
+- **Session Sequence**: Fixed a race condition in `ImageStudio` where revoked URLs could be leaked if the session was cleared while an image update was pending.
+- **SDK Safety**: Added robust input validation to Express API routes to gracefully handle empty or malformed requests.
+- **Model Truth**: Unified `MODELS` constant between server and client to prevent version mismatch errors.
+
 ## [1.7.0] - 2026-05-15
 ### Added
 - **Full-Stack Proxy Architecture**: Migrated Gemini API calls to a server-side Express proxy and implemented a runtime handshake to keep `GEMINI_API_KEY` secure and hidden from the client bundle.
