@@ -1,4 +1,4 @@
-# Changelog - Gemini Pulsar Workspace
+# Changelog - Google Pulsar Workspace
 
 All notable changes to this project will be documented in this file.
 
