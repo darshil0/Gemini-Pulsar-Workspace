@@ -16,7 +16,7 @@ export const EmailHelper: React.FC = () => {
   const [result, setResult] = useState<EmailAnalysis | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
-  const [history, setHistory] = useState<EmailAnalysis[]>(() => {
+  const [history, setHistory] = useState<(EmailAnalysis & { timestamp: number })[]>(() => {
     try {
       const saved = localStorage.getItem('email_analysis_history');
       if (saved) {
@@ -24,9 +24,8 @@ export const EmailHelper: React.FC = () => {
         // Filter out entries older than 24 hours
         const now = Date.now();
         const oneDay = 24 * 60 * 60 * 1000;
-        return (parsed as (EmailAnalysis & { timestamp?: number })[])
-          .filter(item => !item.timestamp || (now - item.timestamp < oneDay))
-          .map(({ timestamp, ...rest }) => rest);
+        return (parsed as (EmailAnalysis & { timestamp: number })[])
+          .filter(item => now - item.timestamp < oneDay);
       }
     } catch (e) {
       console.error("Failed to load history", e);
@@ -48,19 +47,9 @@ export const EmailHelper: React.FC = () => {
       
       setHistory(prev => {
         const newItem = { ...data, timestamp: Date.now() };
-        // Get existing history with timestamps
-        const existingRaw = localStorage.getItem('email_analysis_history');
-        let existingWithTime: (EmailAnalysis & { timestamp?: number })[] = [];
-        try {
-          if (existingRaw) existingWithTime = JSON.parse(existingRaw);
-        } catch (e) {
-          console.error("Failed to parse history during save", e);
-        }
-        
-        const newHistoryWithTime = [newItem, ...existingWithTime].slice(0, 5);
-        localStorage.setItem('email_analysis_history', JSON.stringify(newHistoryWithTime));
-        
-        return [data, ...prev].slice(0, 5);
+        const newHistory = [newItem, ...prev].slice(0, 5);
+        localStorage.setItem('email_analysis_history', JSON.stringify(newHistory));
+        return newHistory;
       });
     } catch (err) {
       setError('Failed to analyze email. Please try again.');
