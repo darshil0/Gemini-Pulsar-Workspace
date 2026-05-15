@@ -2,6 +2,23 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.0] - 2026-05-15
+### Added
+- **Full-Stack Proxy Architecture**: Migrated Gemini API calls to a server-side Express proxy to keep `GEMINI_API_KEY` secure and hidden from the client bundle.
+- **AudioWorklet Implementation**: Replaced deprecated `ScriptProcessorNode` with a high-performance `AudioWorklet` to move audio processing off the main thread.
+- **Strict Mode Compliance**: Enabled `"strict": true` in `tsconfig.json` and resolved all null-checks and type mismatches.
+
+### Changed
+- **Enhanced Dark/Light Mode**: Refined the design system for better accessibility in Light Mode, including explicit background tokens and contrast-fixed glass components.
+- **Model Registry Update**: Corrected model strings to use production-stable Gemini aliases (`gemini-1.5-flash`, `gemini-2.0-flash-exp`).
+- **Improved Retry Logic**: "Reset & Try Again" in Image Studio now allows dismissing errors without wiping the uploaded image asset.
+
+### Fixed
+- **History Data Integrity**: Fixed a bug where all history items in Email Helper would receive identical timestamps during a save.
+- **Visualizer Initialization**: Fixed a race condition where the `analyser` node was null during the first active frame of the Vocal Workspace.
+- **Notification Robustness**: Switched to `crypto.randomUUID()` for unique notification tracking, preventing ID collisions.
+- **Metadata**: Updated `index.html` title and cleaned up duplicate `vite` dependencies in `package.json`.
+
 ## [1.6.0] - 2026-05-15
 ### Changed
 - **Architectural Re-organization**: Refactored the project structure into a modular hierarchy:
