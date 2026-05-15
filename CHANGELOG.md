@@ -2,6 +2,15 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.5.0] - 2026-05-15
+### Added
+- **Global Notification System**: Implemented a subtle, non-blocking notification system (`useNotification`) for real-time feedback.
+- **Context-Aware Alerts**: Integrated notifications across all major modules:
+    - **Email Helper**: Success/error alerts for analysis and clipboard actions.
+    - **Image Studio**: Status updates for transformations and downloads.
+    - **Vocal Workspace**: Connection status and session activity alerts.
+- **Micro-Animations**: Added smooth entrance/exit animations for notifications using `motion/react` with layout-stable positioning.
+
 ## [1.4.0] - 2026-05-15
 ### Added
 - **API Key Guard**: Added comprehensive environment variable validation to prevent startup crashes when `GEMINI_API_KEY` is missing.

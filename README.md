@@ -13,6 +13,7 @@ A high-performance AI dashboard featuring an intelligent email assistant, genera
 - **Vocal Workspace**: Low-latency, streaming voice interaction with real-time feedback.
     - **Adaptive Jitter Buffer**: A custom 150ms lookahead logic in `useAudioLive` to absorb network fluctuations and prevent audio "crackling" at 24kHz.
     - **Orbital Visualizer**: A canvas-based frequency visualizer that provides real-time orbital feedback of the model's vocal output.
+- **Notification System**: A global, context-aware notification provider (`useNotification`) for non-blocking success, error, and info alerts.
 - **Modern UI**: Polished "Clean Minimalism" theme with glassmorphism effects, fluid animations, and a responsive bento-grid layout.
 
 ## 🛠️ Technical Implementation Details
@@ -56,7 +57,9 @@ The Image Studio uses a lazy-loading and proactive cleanup pattern:
 ## 🏗️ Architecture
 
 - `/src/components`: UI modules for Email, Image, and Voice workspaces.
-- `/src/hooks/useAudioLive.ts`: Manages MediaStream, ScriptProcessor, and PCM->Base64 conversion for bidirectional Gemini Live audio.
+- `/src/hooks`: 
+    - `useAudioLive.ts`: Manages MediaStream, ScriptProcessor, and PCM->Base64 conversion for bidirectional Gemini Live audio.
+    - `useNotification.tsx`: Global notification context and provider logic.
 - `/src/services/gemini.ts`: Centralized service for SDK initialization and API calling patterns.
 - `/src/types.ts`: Centralized TypeScript interfaces for type-safe cross-component communication.
 - `/src/constants.ts`: Global configuration (sample rates, model names, style prompts).
