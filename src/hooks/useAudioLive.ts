@@ -204,7 +204,8 @@ export const useAudioLive = () => {
       sessionRef.current = session;
 
       workletNode.port.onmessage = (event) => {
-        if (!sessionRef.current || !isActiveRef.current) return;
+        const session = sessionRef.current;
+        if (!session || !isActiveRef.current) return;
         
         const inputData = event.data;
         const pcm16 = new Int16Array(inputData.length);
@@ -214,9 +215,12 @@ export const useAudioLive = () => {
         
         const base64 = arrayBufferToBase64(pcm16.buffer);
         try {
-          sessionRef.current.sendRealtimeInput({
-            audio: { data: base64, mimeType: `audio/pcm;rate=${VOICE_CONFIG.INPUT_SAMPLE_RATE}` }
-          });
+          // Final check to ensure we haven't stopped mid-processing
+          if (isActiveRef.current && sessionRef.current === session) {
+            session.sendRealtimeInput({
+              audio: { data: base64, mimeType: `audio/pcm;rate=${VOICE_CONFIG.INPUT_SAMPLE_RATE}` }
+            });
+          }
         } catch (err) {
           console.error("Error sending audio input:", err);
         }
