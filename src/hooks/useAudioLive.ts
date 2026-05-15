@@ -12,12 +12,12 @@ export const useAudioLive = () => {
   const [isConnecting, setIsConnecting] = useState(false);
   const [transcription, setTranscription] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
+  const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
   
   const audioContextRef = useRef<AudioContext | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const processorRef = useRef<ScriptProcessorNode | null>(null);
-  const sessionRef = useRef<any>(null); 
-  const analyserRef = useRef<AnalyserNode | null>(null);
+  const sessionRef = useRef<any>(null); // Ideally use SDK types if available
   const activeSourcesRef = useRef<AudioBufferSourceNode[]>([]);
 
   const nextPlayTimeRef = useRef<number>(0);
@@ -53,6 +53,7 @@ export const useAudioLive = () => {
     }
     setIsActive(false);
     setIsConnecting(false);
+    setAnalyser(null);
     nextPlayTimeRef.current = 0;
   }, []);
 
@@ -91,17 +92,34 @@ export const useAudioLive = () => {
       const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
       streamRef.current = stream;
 
-      const analyser = audioContext.createAnalyser();
-      analyser.fftSize = 256;
-      analyserRef.current = analyser;
+      const sourceNode = audioContext.createMediaStreamSource(stream);
+      const analyserNode = audioContext.createAnalyser();
+      analyserNode.fftSize = 256;
+      setAnalyser(analyserNode);
 
-      const source = audioContext.createMediaStreamSource(stream);
-      const processor = audioContext.createScriptProcessor(2048, 1, 1);
-      processorRef.current = processor;
-
-      source.connect(analyser);
-      analyser.connect(processor);
-      processor.connect(audioContext.destination);
+      // Modern AudioWorklet implementation (Issue #4) to avoid main-thread blocking
+      const processorCode = `
+        class AudioProcessor extends AudioWorkletProcessor {
+          process(inputs) {
+            const input = inputs[0];
+            if (input.length > 0) {
+              const samples = input[0];
+              this.port.postMessage(samples);
+            }
+            return true;
+          }
+        }
+        registerProcessor('audio-processor', AudioProcessor);
+      `;
+      const blob = new Blob([processorCode], { type: 'application/javascript' });
+      const workletUrl = URL.createObjectURL(blob);
+      await audioContext.audioWorklet.addModule(workletUrl);
+      
+      const workletNode = new AudioWorkletNode(audioContext, 'audio-processor');
+      
+      sourceNode.connect(analyserNode);
+      analyserNode.connect(workletNode);
+      workletNode.connect(audioContext.destination);
 
       const session = await connectLiveVoice({
         onopen: () => {
@@ -126,7 +144,6 @@ export const useAudioLive = () => {
             const bytes = new Uint8Array(binary.length);
             for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
             
-            // Assuming 24000Hz mono PCM from Gemini
             const pcm16 = new Int16Array(bytes.buffer);
             const float32 = new Float32Array(pcm16.length);
             for (let i = 0; i < pcm16.length; i++) float32[i] = pcm16[i] / 0x7FFF;
@@ -135,29 +152,21 @@ export const useAudioLive = () => {
               const buffer = audioContextRef.current.createBuffer(1, float32.length, VOICE_CONFIG.OUTPUT_SAMPLE_RATE);
               buffer.getChannelData(0).set(float32);
               
-              const source = audioContextRef.current.createBufferSource();
-              source.buffer = buffer;
-              source.connect(audioContextRef.current.destination);
-              
-              // Track active sources to handle interruptions
-              activeSourcesRef.current.push(source);
-              source.onended = () => {
-                source.disconnect();
-                activeSourcesRef.current = activeSourcesRef.current.filter(s => s !== source);
+              const sourceNode = audioContextRef.current.createBufferSource();
+              sourceNode.buffer = buffer;
+              sourceNode.connect(audioContextRef.current.destination);
+              activeSourcesRef.current.push(sourceNode);
+              sourceNode.onended = () => {
+                sourceNode.disconnect();
+                activeSourcesRef.current = activeSourcesRef.current.filter(s => s !== sourceNode);
               };
 
-              // Adaptive Jitter Buffer logic
-              // We maintain a 150ms lookahead to absorb network jitter
               const now = audioContextRef.current.currentTime;
-              
               let startTime = nextPlayTimeRef.current;
-              
-              // If we've drifted too far or are just starting, reset to now + lookahead
               if (startTime < now || startTime > now + JITTER_BUFFER.DRIFT_THRESHOLD) {
                 startTime = now + JITTER_BUFFER.LOOKAHEAD;
               }
-              
-              source.start(startTime);
+              sourceNode.start(startTime);
               nextPlayTimeRef.current = startTime + buffer.duration;
             } catch (e) {
               console.error("Audio playback error:", e);
@@ -165,7 +174,6 @@ export const useAudioLive = () => {
           }
 
           if (message.serverContent?.interrupted) {
-            // Stop all current audio immediately on interruption
             activeSourcesRef.current.forEach(s => {
               try { s.stop(); } catch(e) {}
             });
@@ -185,17 +193,16 @@ export const useAudioLive = () => {
 
       sessionRef.current = session;
 
-      processor.onaudioprocess = (e) => {
-        if (!sessionRef.current || sessionRef.current.readyState === 3) return; // 3 is CLOSED
+      workletNode.port.onmessage = (event) => {
+        if (!sessionRef.current || !isActive) return;
         
-        const inputData = e.inputBuffer.getChannelData(0);
+        const inputData = event.data;
         const pcm16 = new Int16Array(inputData.length);
         for (let i = 0; i < inputData.length; i++) {
           pcm16[i] = Math.max(-1, Math.min(1, inputData[i])) * 0x7FFF;
         }
         
         const base64 = arrayBufferToBase64(pcm16.buffer);
-        
         try {
           sessionRef.current.sendRealtimeInput({
             audio: { data: base64, mimeType: `audio/pcm;rate=${VOICE_CONFIG.INPUT_SAMPLE_RATE}` }
@@ -212,8 +219,6 @@ export const useAudioLive = () => {
     }
   }, [isActive, stop]);
 
-
-
   useEffect(() => {
     return () => {
       stop();
@@ -226,7 +231,7 @@ export const useAudioLive = () => {
     isActive, 
     isConnecting, 
     error, 
-    analyser: analyserRef.current,
+    analyser,
     transcription
   };
 };

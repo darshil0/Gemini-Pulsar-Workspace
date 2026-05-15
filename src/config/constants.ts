@@ -3,9 +3,9 @@
  */
 
 export const MODELS = {
-  GEMINI_FLASH: "gemini-3-flash-preview",
-  GEMINI_IMAGE: "gemini-2.5-flash-image",
-  GEMINI_LIVE: "gemini-3.1-flash-live-preview",
+  GEMINI_FLASH: "gemini-1.5-flash",
+  GEMINI_IMAGE: "gemini-1.5-flash", // Using flash for multi-modal transformations
+  GEMINI_LIVE: "gemini-2.0-flash-exp",
 } as const;
 
 export const VOICE_CONFIG = {

@@ -47,11 +47,20 @@ export const EmailHelper: React.FC = () => {
       notify('success', 'Analysis Complete', `Email identified as ${data.category} with ${data.priority} priority.`);
       
       setHistory(prev => {
-        const newHistory = [data, ...prev].slice(0, 5);
-        localStorage.setItem('email_analysis_history', JSON.stringify(
-          newHistory.map(item => ({ ...item, timestamp: Date.now() }))
-        ));
-        return newHistory;
+        const newItem = { ...data, timestamp: Date.now() };
+        // Get existing history with timestamps
+        const existingRaw = localStorage.getItem('email_analysis_history');
+        let existingWithTime: (EmailAnalysis & { timestamp?: number })[] = [];
+        try {
+          if (existingRaw) existingWithTime = JSON.parse(existingRaw);
+        } catch (e) {
+          console.error("Failed to parse history during save", e);
+        }
+        
+        const newHistoryWithTime = [newItem, ...existingWithTime].slice(0, 5);
+        localStorage.setItem('email_analysis_history', JSON.stringify(newHistoryWithTime));
+        
+        return [data, ...prev].slice(0, 5);
       });
     } catch (err) {
       setError('Failed to analyze email. Please try again.');
@@ -154,6 +163,7 @@ export const EmailHelper: React.FC = () => {
                   onClick={() => {
                     localStorage.removeItem('email_analysis_history');
                     setHistory([]);
+                    notify('info', 'History Cleared', 'Your local analysis cache has been reset.');
                   }}
                   className="text-[10px] font-bold text-slate-500 hover:text-red-400 transition-colors uppercase tracking-widest"
                 >

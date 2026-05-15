@@ -31,91 +31,82 @@ export default function App() {
   }, [isDarkMode]);
 
   const tabs = [
-    { id: 'email', label: 'Email Helper', icon: Mail, color: 'text-blue-500' },
-    { id: 'image', label: 'Image Studio', icon: Zap, color: 'text-purple-500' },
-    { id: 'voice', label: 'Vocal Workspace', icon: Mic, color: 'text-rose-500' },
+    { id: 'email', label: 'Email Helper', icon: Mail },
+    { id: 'image', label: 'Image Studio', icon: Zap },
+    { id: 'voice', label: 'Vocal Workspace', icon: Mic },
+    { id: 'settings', label: 'System Registry', icon: LayoutGrid },
   ];
 
   return (
     <NotificationProvider>
-      <div className="min-h-screen font-sans">
+      <div className="min-h-screen font-sans bg-neutral-50 dark:bg-[#0a0a0b] text-neutral-900 dark:text-neutral-100 transition-colors duration-300">
         {/* Background blobs */}
-      <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
-        <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] bg-blue-500/10 blur-[120px] rounded-full animate-pulse-subtle" />
-        <div className="absolute top-[40%] -right-[10%] w-[60%] h-[60%] bg-purple-500/10 blur-[120px] rounded-full animate-pulse-subtle" style={{ animationDelay: '2s' }} />
-      </div>
+        <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+          <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] bg-blue-500/10 dark:bg-blue-500/5 blur-[120px] rounded-full animate-pulse-subtle" />
+          <div className="absolute top-[40%] -right-[10%] w-[60%] h-[60%] bg-purple-500/10 dark:bg-purple-500/5 blur-[120px] rounded-full animate-pulse-subtle" style={{ animationDelay: '2s' }} />
+        </div>
 
-      <div className="max-w-[1400px] mx-auto min-h-screen flex flex-col p-4 md:p-8">
-        
-        {/* Header */}
-        <header className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8 lg:mb-12">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-brand-primary to-brand-secondary flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
-              <Sparkles className="w-6 h-6 animate-pulse" />
+        <div className="max-w-[1400px] mx-auto min-h-screen flex flex-col p-4 md:p-8">
+          
+          {/* Header */}
+          <header className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8 lg:mb-12">
+            <div className="flex items-center gap-3">
+              <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 flex items-center justify-center text-white shadow-lg shadow-blue-500/20">
+                <Sparkles className="w-6 h-6 animate-pulse" />
+              </div>
+              <div>
+                <h1 className="text-2xl font-bold tracking-tight">Google Pulsar</h1>
+                <p className="text-xs font-medium tracking-[0.2em] uppercase opacity-50">High-Performance Workspace</p>
+              </div>
             </div>
-            <div>
-              <h1 className="text-2xl font-bold tracking-tight">Google Pulsar</h1>
-              <p className="text-xs font-medium tracking-[0.2em] uppercase opacity-50">High-Performance Workspace</p>
-            </div>
-          </div>
 
-          <nav className="flex gap-2 bg-black/20 p-1.5 rounded-xl border border-white/5 relative">
-            {tabs.map((tab) => (
+            <nav className="flex gap-1 bg-neutral-200/50 dark:bg-black/20 p-1.5 rounded-xl border border-neutral-300/50 dark:border-white/5 relative">
+              {tabs.map((tab) => (
+                <button
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as ActiveTab)}
+                  className={cn(
+                    "relative px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-all duration-200 z-10",
+                    activeTab === tab.id 
+                      ? "text-blue-600 dark:text-blue-400" 
+                      : "text-neutral-500 dark:text-slate-400 hover:text-neutral-900 dark:hover:text-white"
+                  )}
+                >
+                  {activeTab === tab.id && (
+                    <motion.div
+                      layoutId="active-tab-bg"
+                      className="absolute inset-0 bg-white dark:bg-blue-500/10 border border-neutral-300 dark:border-blue-500/30 rounded-lg -z-10 shadow-sm dark:shadow-none"
+                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                    />
+                  )}
+                  <tab.icon className="w-4 h-4" />
+                  <span className="hidden lg:inline">{tab.label}</span>
+                </button>
+              ))}
+              <div className="w-px h-6 bg-neutral-300 dark:bg-white/10 mx-1" />
               <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id as ActiveTab)}
-                className={cn(
-                  "relative px-5 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-all duration-200 z-10",
-                  activeTab === tab.id 
-                    ? "text-blue-400" 
-                    : "text-slate-400 hover:text-white"
-                )}
+                 onClick={() => setIsDarkMode(!isDarkMode)}
+                 className="p-2 rounded-lg text-neutral-500 dark:text-slate-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
               >
-                {activeTab === tab.id && (
-                  <motion.div
-                    layoutId="active-tab-bg"
-                    className="absolute inset-0 bg-blue-500/10 border border-blue-500/30 rounded-lg -z-10"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
-                )}
-                <tab.icon className="w-4 h-4" />
-                <span className="hidden sm:inline">{tab.label}</span>
+                {isDarkMode ? <Sun className="w-5 h-5 text-yellow-500" /> : <Moon className="w-5 h-5" />}
               </button>
-            ))}
-            <div className="w-px h-6 bg-white/10 mx-2" />
-            <button
-               onClick={() => setIsDarkMode(!isDarkMode)}
-               className="p-2 rounded-lg text-slate-400 hover:text-white glass-hover transition-colors"
-            >
-              {isDarkMode ? <Sun className="w-5 h-5 text-yellow-500" /> : <Moon className="w-5 h-5" />}
-            </button>
-          </nav>
+            </nav>
 
-          <div className="flex items-center gap-4">
-             <div className={cn(
-               "flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest glass",
-               hasApiKey 
-                 ? "text-emerald-400" 
-                 : "text-red-400"
-             )}>
-               <span className={cn("status-dot", hasApiKey ? "bg-emerald-500 shadow-[0_0_8px_#10b981]" : "bg-red-500 shadow-[0_0_8px_#ef4444]")}></span>
-               {hasApiKey ? 'System Ready' : 'Key Required'}
-             </div>
-             
-             <button 
-              onClick={() => setActiveTab('settings')}
-              className={cn(
-                "w-10 h-10 rounded-xl flex items-center justify-center transition-all",
-                activeTab === 'settings' ? "bg-brand-primary text-white" : "glass glass-hover text-slate-400"
-              )}
-             >
-                <LayoutGrid className="w-5 h-5" />
-             </button>
-          </div>
-        </header>
+            <div className="flex items-center gap-4">
+               <div className={cn(
+                 "flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest bg-neutral-200/50 dark:bg-white/5 border border-neutral-300/50 dark:border-white/5",
+                 hasApiKey 
+                   ? "text-emerald-600 dark:text-emerald-400" 
+                   : "text-red-600 dark:text-red-400"
+               )}>
+                 <span className={cn("w-2 h-2 rounded-full", hasApiKey ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]")}></span>
+                 {hasApiKey ? 'System Ready' : 'Key Required'}
+               </div>
+            </div>
+          </header>
 
         {/* Main Workspace */}
-        <main className="flex-1 glass shadow-2xl rounded-2xl p-6 md:p-8 relative overflow-hidden flex flex-col min-h-0">
+        <main className="flex-1 bg-white dark:bg-black/20 backdrop-blur-xl border border-neutral-300/50 dark:border-white/5 shadow-2xl rounded-2xl p-6 md:p-8 relative overflow-hidden flex flex-col min-h-0 transition-colors duration-300">
           {/* Internal background elements */}
           <div className="absolute top-0 right-0 p-8 flex gap-2 opacity-5 pointer-events-none">
             <Sparkles className="w-32 h-32" />

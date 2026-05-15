@@ -7,7 +7,7 @@ import { IMAGE_STYLES } from '../../config/constants';
 import { ImageTransformationResult } from '../../config/types';
 import { useNotification } from '../../context/NotificationContext';
 
-const iconMap: Record<string, any> = {
+const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Sparkles,
   Palette,
   Camera,
@@ -47,7 +47,9 @@ export const ImageStudio: React.FC = () => {
       
       const reader = new FileReader();
       reader.onload = () => {
-        imageBase64Ref.current = reader.result as string;
+        const result = reader.result as string;
+        // Strip data URI header immediately (Issue #7) 
+        imageBase64Ref.current = result.includes(',') ? result.split(',')[1] : result;
       };
       reader.onerror = () => setError("Failed to read image file.");
       reader.readAsDataURL(file);
@@ -232,12 +234,20 @@ export const ImageStudio: React.FC = () => {
                 >
                   <AlertCircle className="w-12 h-12" />
                   <p className="text-sm font-medium">{error}</p>
-                  <button 
-                    onClick={clearSession}
-                    className="mt-2 text-xs uppercase tracking-widest font-bold underline underline-offset-4"
-                  >
-                    Reset & Try Again
-                  </button>
+                  <div className="flex gap-4">
+                    <button 
+                      onClick={() => setError(null)}
+                      className="mt-2 text-xs uppercase tracking-widest font-bold border border-red-500/20 px-3 py-1 rounded"
+                    >
+                      Dismiss & Retry
+                    </button>
+                    <button 
+                      onClick={clearSession}
+                      className="mt-2 text-xs uppercase tracking-widest font-bold opacity-50 hover:text-red-400 transition-colors"
+                    >
+                      Clear All
+                    </button>
+                  </div>
                 </motion.div>
               ) : isProcessing ? (
                 <motion.div 
