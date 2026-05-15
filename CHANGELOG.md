@@ -2,7 +2,18 @@
 
 All notable changes to this project will be documented in this file.
 
-## [1.3.1] - 2024-05-11
+## [1.4.0] - 2026-05-15
+### Added
+- **API Key Guard**: Added comprehensive environment variable validation to prevent startup crashes when `GEMINI_API_KEY` is missing.
+- **Image Size Limits**: Implemented client-side validation to block uploads over 4MB, preventing payload errors.
+- **Improved vision prompts**: Enhanced the creative transformation logic for vision-guided image remixing.
+
+### Fixed
+- **Memory Optimization**: Added transcription truncation and forced audio source disconnection to prevent memory leaks in extended sessions.
+- **Live Voice Interruption**: Hard-synchronized current audio playback with model-led interruption signals.
+- **Accessibility**: Added ARIA labels and pressed-state feedback to the main Vocal Workspace control.
+
+## [1.3.1] - 2026-05-11
 ### Added
 - Integrated **D3.js** and **Recharts** for future data visualization capabilities.
 - Added adaptive scaling for the **Orbital Visualizer** in Vocal Workspace, improving responsiveness to different screen sizes.
@@ -17,7 +28,7 @@ All notable changes to this project will be documented in this file.
 - **Interruption Logic**: Fixed a bug where audio playback would continue after the model sent an `interrupted` signal.
 - **Copy Feedback**: Fixed lack of visual confirmation when copying draft replies in Email Helper.
 
-## [1.3.0] - 2024-05-11
+## [1.3.0] - 2026-05-11
 ### Added
 - Implemented **Adaptive Jitter Buffer** (150ms lookahead) for ultra-smooth 24kHz audio playback.
 - Added **Orbital Frequency Visualizer** and real-time **Status Indicators** (Jitter Buffer Active) in Vocal Workspace.
@@ -37,7 +48,7 @@ All notable changes to this project will be documented in this file.
 - Fixed memory leakage vulnerability during rapid image re-uploads.
 - Corrected TypeScript interface mismatches in the Live Voice interaction layer.
 
-## [1.2.0] - 2024-05-11
+## [1.2.0] - 2026-05-11
 ### Added
 - Implemented "Clear" and "Reset" functionality in Email Helper and Image Studio for better session control.
 - Added 24kHz mono PCM audio playback support in the Vocal Workspace.
@@ -54,7 +65,7 @@ All notable changes to this project will be documented in this file.
 - Resolved transcription data binding issues in the Live Voice hook.
 - Fixed potential null pointer exceptions during audio context cleanup.
 
-## [1.1.0] - 2024-05-11
+## [1.1.0] - 2026-05-11
 ### Added
 - Created `README.md` and `CHANGELOG.md` for better project documentation.
 - Integrated "Live Transcription" UI in the Vocal Workspace.
@@ -71,7 +82,7 @@ All notable changes to this project will be documented in this file.
 - Fixed `CheckCircle` icon collision by migrating to `CheckCircle2` from Lucide.
 - Patched build errors related to Tailwind utility class generation.
 
-## [1.0.0] - 2024-05-11
+## [1.0.0] - 2026-05-11
 ### Added
 - Initial release of Google Pulsar Workspace.
 - Core Email Helper module with JSON schema-based analysis.
