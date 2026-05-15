@@ -13,9 +13,9 @@ const getAI = () => {
   if (!genAIInstance) {
     const apiKey = process.env.GEMINI_API_KEY;
     if (!apiKey) {
-      console.warn("GEMINI_API_KEY is not set.");
+      throw new Error("GEMINI_API_KEY is not defined in environment variables. Please check your AI Studio settings.");
     }
-    genAIInstance = new GoogleGenAI({ apiKey: apiKey || '' });
+    genAIInstance = new GoogleGenAI({ apiKey });
   }
   return genAIInstance;
 };
@@ -92,8 +92,15 @@ export const transformImage = async (
             },
           },
           {
-            text: `Please modify this image based on the following instruction or style: "${instruction}". 
-            If you are unable to generate a new image, provide a detailed creative analysis of how the image would look after such a transformation.`,
+            text: `Instruction: ${instruction}
+            
+            Task: Act as a creative image editor. 
+            If the instruction is a style (e.g., Cyberpunk, Sketch), re-imagine the provided image in that style. 
+            If the instruction is a modification (e.g., "Add a cat"), describe the resulting image in vivid detail.
+            
+            Return the result in two parts:
+            1. An inline image if you can generate it (multi-modal).
+            2. A textual 'Creative Analysis' of the transformation.`,
           },
         ],
       }

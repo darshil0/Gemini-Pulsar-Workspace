@@ -28,6 +28,11 @@ export const ImageStudio: React.FC = () => {
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (file) {
+      if (file.size > 4 * 1024 * 1024) {
+        setError("Image is too large. Please upload an image under 4MB.");
+        return;
+      }
+      
       setError(null);
       // Clear previous object URL if it exists to prevent memory leaks
       if (image && image.startsWith('blob:')) {

@@ -110,10 +110,13 @@ export const useAudioLive = () => {
           console.log("Connected to Gemini Live");
         },
         onmessage: async (message: LiveServerMessage) => {
-          // Transcription handling
+          // Transcription handling - Truncate to prevent memory bloat over time
           const transcriptionPart = message.serverContent?.modelTurn?.parts?.find(p => p.text);
           if (transcriptionPart?.text) {
-             setTranscription(prev => prev + transcriptionPart.text);
+             setTranscription(prev => {
+               const combined = prev + transcriptionPart.text;
+               return combined.length > 3000 ? '...' + combined.slice(-3000) : combined;
+             });
           }
           
           const audioPart = message.serverContent?.modelTurn?.parts?.find(p => p.inlineData);
@@ -139,6 +142,7 @@ export const useAudioLive = () => {
               // Track active sources to handle interruptions
               activeSourcesRef.current.push(source);
               source.onended = () => {
+                source.disconnect();
                 activeSourcesRef.current = activeSourcesRef.current.filter(s => s !== source);
               };
 

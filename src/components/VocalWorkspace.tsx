@@ -105,8 +105,10 @@ export const VocalWorkspace: React.FC = () => {
           <button
             onClick={isActive ? stop : start}
             disabled={isConnecting}
+            aria-label={isActive ? "Stop voice session" : "Start voice session"}
+            aria-pressed={isActive}
             className={cn(
-              "relative w-48 h-48 rounded-full flex items-center justify-center transition-all duration-500 shadow-2xl overflow-hidden glass",
+              "relative w-48 h-48 rounded-full flex items-center justify-center transition-all duration-500 shadow-2xl overflow-hidden glass group",
               isActive ? "border-2 border-blue-500/50 shadow-blue-500/20" : "hover:border-white/20 border border-white/5"
             )}
           >

@@ -70,10 +70,14 @@ export const EmailHelper: React.FC = () => {
     setIsCopied(false);
   };
 
-  const copyToClipboard = (text: string) => {
-    navigator.clipboard.writeText(text);
-    setIsCopied(true);
-    setTimeout(() => setIsCopied(false), 2000);
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      setIsCopied(true);
+      setTimeout(() => setIsCopied(false), 2000);
+    } catch (err) {
+      console.error("Failed to copy text:", err);
+    }
   };
 
   return (
@@ -139,7 +143,7 @@ export const EmailHelper: React.FC = () => {
             <div className="pt-4 border-t border-white/5">
               <div className="flex items-center justify-between mb-2">
                 <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
-                  <Clock className="w-3 h-3" /> Recent History
+                  <Clock className="w-3 h-3" /> Recent History (24h)
                 </h4>
                 <button 
                   onClick={() => {
