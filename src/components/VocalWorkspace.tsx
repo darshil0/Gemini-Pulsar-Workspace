@@ -3,11 +3,25 @@ import { Mic, MicOff, Waves, Volume2, Sparkles, MessageSquare, ExternalLink, Zap
 import { motion, AnimatePresence } from 'motion/react';
 import { useAudioLive } from '../hooks/useAudioLive';
 import { cn } from '../lib/utils';
+import { useNotification } from '../hooks/useNotification';
 
 export const VocalWorkspace: React.FC = () => {
+  const { notify } = useNotification();
   const { start, stop, isActive, isConnecting, error, analyser, transcription } = useAudioLive();
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const transcriptionEndRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    if (isActive) {
+      notify('info', 'Live Session Active', 'Streaming high-fidelity audio to Gemini.');
+    }
+  }, [isActive, notify]);
+
+  useEffect(() => {
+    if (error) {
+      notify('error', 'Connectivity Restricted', 'There was an issue establishing the live voice stream.');
+    }
+  }, [error, notify]);
 
   useEffect(() => {
     if (transcriptionEndRef.current) {

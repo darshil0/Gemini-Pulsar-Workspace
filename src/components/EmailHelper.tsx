@@ -4,12 +4,13 @@ import { motion, AnimatePresence } from 'motion/react';
 import { analyzeEmail } from '../services/gemini';
 import { cn } from '../lib/utils';
 import { EmailAnalysis } from '../types';
+import { useNotification } from '../hooks/useNotification';
 
 /**
  * Intelligent Email Assistant component.
- * Allows users to paste email text and get tone analysis, priority, action items, and a generated response.
  */
 export const EmailHelper: React.FC = () => {
+  const { notify } = useNotification();
   const [input, setInput] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
   const [result, setResult] = useState<EmailAnalysis | null>(null);
@@ -43,6 +44,7 @@ export const EmailHelper: React.FC = () => {
     try {
       const data = await analyzeEmail(input);
       setResult(data);
+      notify('success', 'Analysis Complete', `Email identified as ${data.category} with ${data.priority} priority.`);
       
       setHistory(prev => {
         const newHistory = [data, ...prev].slice(0, 5);
@@ -53,6 +55,7 @@ export const EmailHelper: React.FC = () => {
       });
     } catch (err) {
       setError('Failed to analyze email. Please try again.');
+      notify('error', 'Analysis Failed', 'There was an issue processing your email thread.');
       console.error(err);
     } finally {
       setIsAnalyzing(false);
@@ -74,8 +77,10 @@ export const EmailHelper: React.FC = () => {
     try {
       await navigator.clipboard.writeText(text);
       setIsCopied(true);
+      notify('success', 'Copied to Clipboard', 'The draft response is ready to be pasted.');
       setTimeout(() => setIsCopied(false), 2000);
     } catch (err) {
+      notify('error', 'Copy Failed', 'Could not access clipboard.');
       console.error("Failed to copy text:", err);
     }
   };

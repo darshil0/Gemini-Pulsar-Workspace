@@ -11,6 +11,7 @@ import { ImageStudio } from './components/ImageStudio';
 import { VocalWorkspace } from './components/VocalWorkspace';
 import { cn } from './lib/utils';
 import { ActiveTab } from './types';
+import { NotificationProvider } from './hooks/useNotification';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('email');
@@ -36,8 +37,9 @@ export default function App() {
   ];
 
   return (
-    <div className="min-h-screen font-sans">
-      {/* Background blobs */}
+    <NotificationProvider>
+      <div className="min-h-screen font-sans">
+        {/* Background blobs */}
       <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
         <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] bg-blue-500/10 blur-[120px] rounded-full animate-pulse-subtle" />
         <div className="absolute top-[40%] -right-[10%] w-[60%] h-[60%] bg-purple-500/10 blur-[120px] rounded-full animate-pulse-subtle" style={{ animationDelay: '2s' }} />
@@ -172,5 +174,6 @@ export default function App() {
         </footer>
       </div>
     </div>
+  </NotificationProvider>
   );
 }

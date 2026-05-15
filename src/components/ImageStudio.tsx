@@ -5,6 +5,7 @@ import { transformImage } from '../services/gemini';
 import { cn } from '../lib/utils';
 import { IMAGE_STYLES } from '../constants';
 import { ImageTransformationResult } from '../types';
+import { useNotification } from '../hooks/useNotification';
 
 const iconMap: Record<string, any> = {
   Sparkles,
@@ -15,6 +16,7 @@ const iconMap: Record<string, any> = {
 };
 
 export const ImageStudio: React.FC = () => {
+  const { notify } = useNotification();
   const [image, setImage] = useState<string | null>(null);
   const [mimeType, setMimeType] = useState<string>('');
   const [prompt, setPrompt] = useState('');
@@ -72,8 +74,10 @@ export const ImageStudio: React.FC = () => {
     try {
       const data = await transformImage(b64, mimeType, stylePrompt || prompt);
       setResult(data);
+      notify('success', 'Transformation Complete', 'Your image has been re-imagined by Gemini Vision.');
     } catch (err) {
       setError("Image transformation failed. Ensure image size is within limits (max 4MB).");
+      notify('error', 'Transformation Failed', 'There was an issue processing your image asset.');
       console.error(err);
     } finally {
       setIsProcessing(false);
@@ -82,10 +86,15 @@ export const ImageStudio: React.FC = () => {
 
   const handleDownload = () => {
     if (!result?.imageUrl) return;
-    const link = document.createElement('a');
-    link.href = result.imageUrl;
-    link.download = `pulsar-gen-${Date.now()}.png`;
-    link.click();
+    try {
+      const link = document.createElement('a');
+      link.href = result.imageUrl;
+      link.download = `pulsar-gen-${Date.now()}.png`;
+      link.click();
+      notify('info', 'Download Started', 'Your image is being saved to your device.');
+    } catch (err) {
+      notify('error', 'Download Failed', 'Could not initiate image download.');
+    }
   };
 
   return (
