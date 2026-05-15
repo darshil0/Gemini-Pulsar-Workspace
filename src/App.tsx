@@ -19,8 +19,18 @@ export default function App() {
   const [hasApiKey, setHasApiKey] = useState(false);
 
   useEffect(() => {
-    // Check for API key status
-    setHasApiKey(!!process.env.GEMINI_API_KEY);
+    // Check for API key status via health endpoint (Issue #15)
+    const checkApiKey = async () => {
+      try {
+        const res = await fetch('/api/health');
+        const data = await res.json();
+        setHasApiKey(!!data.hasApiKey);
+      } catch (e) {
+        console.error("Health check failed", e);
+        setHasApiKey(false);
+      }
+    };
+    checkApiKey();
     
     // Apply theme
     if (isDarkMode) {
@@ -60,7 +70,7 @@ export default function App() {
               </div>
             </div>
 
-            <nav className="flex gap-1 bg-neutral-200/50 dark:bg-black/20 p-1.5 rounded-xl border border-neutral-300/50 dark:border-white/5 relative">
+            <nav className="flex gap-1 bg-neutral-200/40 dark:bg-black/40 p-1.5 rounded-xl border border-neutral-300 dark:border-white/5 relative items-center">
               {tabs.map((tab) => (
                 <button
                   key={tab.id}
@@ -75,7 +85,7 @@ export default function App() {
                   {activeTab === tab.id && (
                     <motion.div
                       layoutId="active-tab-bg"
-                      className="absolute inset-0 bg-white dark:bg-blue-500/10 border border-neutral-300 dark:border-blue-500/30 rounded-lg -z-10 shadow-sm dark:shadow-none"
+                      className="absolute inset-0 bg-white dark:bg-blue-600/10 border border-neutral-300 dark:border-blue-400/30 rounded-lg -z-10 shadow-sm dark:shadow-none"
                       transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
                     />
                   )}
@@ -106,7 +116,7 @@ export default function App() {
           </header>
 
         {/* Main Workspace */}
-        <main className="flex-1 bg-white dark:bg-black/20 backdrop-blur-xl border border-neutral-300/50 dark:border-white/5 shadow-2xl rounded-2xl p-6 md:p-8 relative overflow-hidden flex flex-col min-h-0 transition-colors duration-300">
+        <main className="flex-1 glass dark:bg-white/[0.02] shadow-2xl rounded-3xl p-6 md:p-8 relative overflow-hidden flex flex-col min-h-0 transition-colors duration-300 border-neutral-200 dark:border-white/10">
           {/* Internal background elements */}
           <div className="absolute top-0 right-0 p-8 flex gap-2 opacity-5 pointer-events-none">
             <Sparkles className="w-32 h-32" />

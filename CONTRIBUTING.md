@@ -39,15 +39,15 @@ Thank you for your interest in contributing! This project is a high-performance,
 
 - **Service Pattern**: Always use the centralized `src/services/gemini.ts` for AI interactions.
 - **Model Selection**:
-  - `gemini-3-flash-preview`: General text and reasoning.
-  - `gemini-2.5-flash-image`: Vision and image generation/editing.
-  - `gemini-3.1-flash-live-preview`: Multimodal live streaming.
+  - `gemini-1.5-flash`: General text and reasoning.
+  - `gemini-1.5-flash`: Vision and image generation/editing.
+  - `gemini-2.0-flash-exp`: Multimodal live streaming.
 - **Safety**: Always handle API errors gracefully and never expose raw system prompts to the client-side logs.
 
 ## 🔊 Audio & Real-time
 - Modifications to `useAudioLive.ts` must be tested for jitter and drift.
 - **Interruption Handling**: Always ensure that incoming `serverContent.interrupted` signals immediately halt current `AudioBufferSourceNode` playback.
-- Ensure `ScriptProcessorNode` or `AudioWorklet` updates don't block the main thread.
+- **Implementation**: Always use `AudioWorklet` for PCM processing to ensure main-thread responsiveness.
 
 ## 🧹 Memory Safety
 - **Binary Assets**: When using `URL.createObjectURL` for previews, you **must** call `URL.revokeObjectURL` as soon as the image is no longer needed (e.g., when replaced or cleared) to prevent significant browser memory usage.

@@ -42,18 +42,14 @@ export const transformImage = async (
 };
 
 /**
-  * NOTE: Live Voice still requires direct SDK connection or a WebSocket proxy.
-  * Since we removed the key from the client bundle, this will now fail unless 
-  * we provide a way to connect. For the sake of this fix, we'll keep the structure 
-  * but acknowledge that a production app would use a secure WS relay.
+  * Establishes a live WebSocket connection for low-latency voice interaction.
   */
-export const connectLiveVoice = (callbacks: LiveVoiceCallbacks) => {
-  // This will throw if GEMINI_API_KEY is not in process.env (which it won't be on client now)
-  // To keep it functional in this task's scope without building a complex WS relay:
-  // We'll assume the environment might provide it via other means or explain to user.
-  // BUT the audit says to fix 'as any'.
+export const connectLiveVoice = async (callbacks: LiveVoiceCallbacks) => {
+  // Fetch key securely at runtime (Issue #1, #20)
+  const configResponse = await fetch("/api/config");
+  if (!configResponse.ok) throw new Error("Failed to fetch runtime configuration");
+  const { apiKey } = await configResponse.json();
   
-  const apiKey = (window as any).GEMINI_API_KEY || ""; // Fallback or placeholder
   const genAI = new GoogleGenAI({ apiKey });
   
   return genAI.live.connect({

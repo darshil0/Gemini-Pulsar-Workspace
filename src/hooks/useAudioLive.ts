@@ -12,12 +12,14 @@ export const useAudioLive = () => {
   const [isConnecting, setIsConnecting] = useState(false);
   const [transcription, setTranscription] = useState<string>('');
   const [error, setError] = useState<string | null>(null);
-  const [analyser, setAnalyser] = useState<AnalyserNode | null>(null);
+  const isActiveRef = useRef(false);
+  const analyserRef = useRef<AnalyserNode | null>(null);
+  const workletRef = useRef<AudioWorkletNode | null>(null);
+  const workletUrlRef = useRef<string | null>(null);
   
   const audioContextRef = useRef<AudioContext | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
-  const processorRef = useRef<ScriptProcessorNode | null>(null);
-  const sessionRef = useRef<any>(null); // Ideally use SDK types if available
+  const sessionRef = useRef<any>(null); // Ideally use type from @google/genai when available
   const activeSourcesRef = useRef<AudioBufferSourceNode[]>([]);
 
   const nextPlayTimeRef = useRef<number>(0);
@@ -38,9 +40,13 @@ export const useAudioLive = () => {
       streamRef.current.getTracks().forEach(track => track.stop());
       streamRef.current = null;
     }
-    if (processorRef.current) {
-      processorRef.current.disconnect();
-      processorRef.current = null;
+    if (workletRef.current) {
+      workletRef.current.disconnect();
+      workletRef.current = null;
+    }
+    if (workletUrlRef.current) {
+      URL.revokeObjectURL(workletUrlRef.current);
+      workletUrlRef.current = null;
     }
     activeSourcesRef.current.forEach(s => {
       try { s.stop(); } catch(e) {}
@@ -52,8 +58,9 @@ export const useAudioLive = () => {
       audioContextRef.current = null;
     }
     setIsActive(false);
+    isActiveRef.current = false;
     setIsConnecting(false);
-    setAnalyser(null);
+    analyserRef.current = null;
     nextPlayTimeRef.current = 0;
   }, []);
 
@@ -95,7 +102,7 @@ export const useAudioLive = () => {
       const sourceNode = audioContext.createMediaStreamSource(stream);
       const analyserNode = audioContext.createAnalyser();
       analyserNode.fftSize = 256;
-      setAnalyser(analyserNode);
+      analyserRef.current = analyserNode;
 
       // Modern AudioWorklet implementation (Issue #4) to avoid main-thread blocking
       const processorCode = `
@@ -114,8 +121,10 @@ export const useAudioLive = () => {
       const blob = new Blob([processorCode], { type: 'application/javascript' });
       const workletUrl = URL.createObjectURL(blob);
       await audioContext.audioWorklet.addModule(workletUrl);
+      workletUrlRef.current = workletUrl;
       
       const workletNode = new AudioWorkletNode(audioContext, 'audio-processor');
+      workletRef.current = workletNode;
       
       sourceNode.connect(analyserNode);
       analyserNode.connect(workletNode);
@@ -125,6 +134,7 @@ export const useAudioLive = () => {
         onopen: () => {
           setIsConnecting(false);
           setIsActive(true);
+          isActiveRef.current = true;
           console.log("Connected to Gemini Live");
         },
         onmessage: async (message: LiveServerMessage) => {
@@ -194,7 +204,7 @@ export const useAudioLive = () => {
       sessionRef.current = session;
 
       workletNode.port.onmessage = (event) => {
-        if (!sessionRef.current || !isActive) return;
+        if (!sessionRef.current || !isActiveRef.current) return;
         
         const inputData = event.data;
         const pcm16 = new Int16Array(inputData.length);
@@ -231,7 +241,7 @@ export const useAudioLive = () => {
     isActive, 
     isConnecting, 
     error, 
-    analyser,
+    analyser: analyserRef.current,
     transcription
   };
 };

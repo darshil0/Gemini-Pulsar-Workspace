@@ -1,20 +1,14 @@
 import express from "express";
 import path from "path";
 import { createServer as createViteServer } from "vite";
-import { GoogleGenAI, Type, Modality } from "@google/genai";
+import { GoogleGenAI, Type } from "@google/genai";
 import dotenv from "dotenv";
+import { MODELS } from "./src/config/constants";
 
 dotenv.config();
 
 const app = express();
 const PORT = 3000;
-
-// High-level Gemini models configuration
-const MODELS = {
-  GEMINI_FLASH: "gemini-1.5-flash",
-  GEMINI_IMAGE: "gemini-1.5-flash",
-  GEMINI_LIVE: "gemini-2.0-flash-exp",
-} as const;
 
 // Gemini client initialization
 let genAI: GoogleGenAI | null = null;
@@ -30,9 +24,24 @@ function getAI() {
 app.use(express.json({ limit: '10mb' }));
 
 // API Routes
+app.get("/api/health", (req, res) => {
+  const hasKey = !!process.env.GEMINI_API_KEY;
+  res.json({ status: "ok", hasApiKey: hasKey });
+});
+
+app.get("/api/config", (req, res) => {
+  const key = process.env.GEMINI_API_KEY;
+  if (!key) return res.status(500).json({ error: "Gemini API key is not set on the server." });
+  res.json({ apiKey: key });
+});
+
 app.post("/api/analyze-email", async (req, res) => {
   try {
     const { emailContent } = req.body;
+    if (!emailContent || typeof emailContent !== 'string') {
+      return res.status(400).json({ error: "Invalid email content provided." });
+    }
+    
     const ai = getAI();
     const result = await ai.models.generateContent({
       model: MODELS.GEMINI_FLASH,
@@ -75,6 +84,11 @@ app.post("/api/analyze-email", async (req, res) => {
 app.post("/api/transform-image", async (req, res) => {
   try {
     const { imageBase64, mimeType, instruction } = req.body;
+    
+    if (!imageBase64 || !mimeType || !instruction) {
+      return res.status(400).json({ error: "Missing required fields (imageBase64, mimeType, instruction)." });
+    }
+
     const ai = getAI();
     const result = await ai.models.generateContent({
       model: MODELS.GEMINI_IMAGE,

@@ -57,10 +57,11 @@ export const ImageStudio: React.FC = () => {
   };
 
   const clearSession = () => {
-    if (image && image.startsWith('blob:')) {
-      URL.revokeObjectURL(image);
-    }
+    const prevImage = image;
     setImage(null);
+    if (prevImage && prevImage.startsWith('blob:')) {
+      URL.revokeObjectURL(prevImage);
+    }
     setMimeType('');
     setPrompt('');
     setResult(null);
@@ -107,7 +108,7 @@ export const ImageStudio: React.FC = () => {
         <div className="lg:col-span-2 flex flex-col gap-6">
           <div className="glass-card p-6 flex flex-col gap-6">
             <div className="flex items-center justify-between">
-              <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 flex items-center gap-2">
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 dark:text-slate-500 flex items-center gap-2">
                 <Layers className="w-3 h-3" />
                 Source Image
               </h3>
@@ -145,7 +146,7 @@ export const ImageStudio: React.FC = () => {
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-col items-center gap-2 text-slate-500">
+                <div className="flex flex-col items-center gap-2 text-neutral-400 dark:text-slate-500">
                   <Upload className="w-6 h-6 opacity-50" />
                   <span className="text-[10px] font-bold uppercase tracking-wider">Upload Asset</span>
                 </div>
@@ -153,7 +154,7 @@ export const ImageStudio: React.FC = () => {
             </div>
 
             <div className="space-y-4">
-              <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 flex items-center gap-2">
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 dark:text-slate-500 flex items-center gap-2">
                 <Wand2 className="w-3 h-3" />
                 Quick Styles
               </h3>
@@ -177,7 +178,7 @@ export const ImageStudio: React.FC = () => {
             </div>
 
             <div className="space-y-3">
-              <h3 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 flex items-center gap-2">
+              <h3 className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 dark:text-slate-500 flex items-center gap-2">
                  <Grid className="w-3 h-3" />
                  Custom Remix
               </h3>

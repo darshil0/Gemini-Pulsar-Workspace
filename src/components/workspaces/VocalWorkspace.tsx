@@ -97,8 +97,8 @@ export const VocalWorkspace: React.FC = () => {
           <Sparkles className="w-3 h-3" />
           SYSTEM LIVE INFRASTRUCTURE
         </div>
-        <h2 className="text-4xl font-bold mb-4 tracking-tight text-white">Vocal Workspace</h2>
-        <p className="text-slate-500 max-w-md mx-auto text-sm leading-relaxed">
+        <h2 className="text-4xl font-bold mb-4 tracking-tight text-neutral-900 dark:text-white">Vocal Workspace</h2>
+        <p className="text-neutral-500 dark:text-slate-500 max-w-md mx-auto text-sm leading-relaxed">
           Experience low-latency, natural voice interaction. Click the heart of Pulsar to begin streaming.
         </p>
       </motion.div>
@@ -138,7 +138,7 @@ export const VocalWorkspace: React.FC = () => {
                 </motion.div>
               ) : (
                 <motion.div key="inactive" initial={{ scale: 0.5 }} animate={{ scale: 1 }}>
-                  <MicOff className="w-12 h-12 text-slate-600" />
+                  <MicOff className="w-12 h-12 text-neutral-400 dark:text-slate-600" />
                 </motion.div>
               )}
             </AnimatePresence>

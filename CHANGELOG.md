@@ -4,7 +4,7 @@ All notable changes to this project will be documented in this file.
 
 ## [1.7.0] - 2026-05-15
 ### Added
-- **Full-Stack Proxy Architecture**: Migrated Gemini API calls to a server-side Express proxy to keep `GEMINI_API_KEY` secure and hidden from the client bundle.
+- **Full-Stack Proxy Architecture**: Migrated Gemini API calls to a server-side Express proxy and implemented a runtime handshake to keep `GEMINI_API_KEY` secure and hidden from the client bundle.
 - **AudioWorklet Implementation**: Replaced deprecated `ScriptProcessorNode` with a high-performance `AudioWorklet` to move audio processing off the main thread.
 - **Strict Mode Compliance**: Enabled `"strict": true` in `tsconfig.json` and resolved all null-checks and type mismatches.
 

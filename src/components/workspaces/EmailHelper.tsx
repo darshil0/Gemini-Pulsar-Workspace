@@ -6,6 +6,8 @@ import { cn } from '../../lib/utils';
 import { EmailAnalysis } from '../../config/types';
 import { useNotification } from '../../context/NotificationContext';
 
+type HistoryItem = EmailAnalysis & { timestamp: number };
+
 /**
  * Intelligent Email Assistant component.
  */
@@ -13,10 +15,10 @@ export const EmailHelper: React.FC = () => {
   const { notify } = useNotification();
   const [input, setInput] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [result, setResult] = useState<EmailAnalysis | null>(null);
+  const [result, setResult] = useState<HistoryItem| null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
-  const [history, setHistory] = useState<(EmailAnalysis & { timestamp: number })[]>(() => {
+  const [history, setHistory] = useState<HistoryItem[]>(() => {
     try {
       const saved = localStorage.getItem('email_analysis_history');
       if (saved) {
@@ -24,7 +26,7 @@ export const EmailHelper: React.FC = () => {
         // Filter out entries older than 24 hours
         const now = Date.now();
         const oneDay = 24 * 60 * 60 * 1000;
-        return (parsed as (EmailAnalysis & { timestamp: number })[])
+        return (parsed as HistoryItem[])
           .filter(item => now - item.timestamp < oneDay);
       }
     } catch (e) {
@@ -42,11 +44,11 @@ export const EmailHelper: React.FC = () => {
     setError(null);
     try {
       const data = await analyzeEmail(input);
-      setResult(data);
+      const newItem = { ...data, timestamp: Date.now() };
+      setResult(newItem);
       notify('success', 'Analysis Complete', `Email identified as ${data.category} with ${data.priority} priority.`);
       
       setHistory(prev => {
-        const newItem = { ...data, timestamp: Date.now() };
         const newHistory = [newItem, ...prev].slice(0, 5);
         localStorage.setItem('email_analysis_history', JSON.stringify(newHistory));
         return newHistory;
@@ -60,7 +62,7 @@ export const EmailHelper: React.FC = () => {
     }
   };
 
-  const selectFromHistory = (item: EmailAnalysis) => {
+  const selectFromHistory = (item: HistoryItem) => {
     setResult(item);
   };
 
@@ -93,7 +95,7 @@ export const EmailHelper: React.FC = () => {
       >
         <div className="flex-1 glass-card p-5 flex flex-col relative group/input">
           <div className="flex items-center justify-between mb-4">
-            <label className="text-xs font-bold uppercase tracking-widest text-slate-500">Input Content</label>
+            <label className="text-xs font-bold uppercase tracking-widest text-neutral-500 dark:text-slate-500">Input Content</label>
             <div className="flex items-center gap-3">
               {input && (
                 <button 
@@ -145,7 +147,7 @@ export const EmailHelper: React.FC = () => {
           {history.length > 0 && (
             <div className="pt-4 border-t border-white/5">
               <div className="flex items-center justify-between mb-2">
-                <h4 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest flex items-center gap-2">
+                <h4 className="text-[10px] font-bold text-neutral-500 dark:text-slate-500 uppercase tracking-widest flex items-center gap-2">
                   <Clock className="w-3 h-3" /> Recent History (24h)
                 </h4>
                 <button 
@@ -160,13 +162,13 @@ export const EmailHelper: React.FC = () => {
                 </button>
               </div>
               <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-hide">
-                {history.map((item, idx) => (
+                {history.map((item) => (
                   <button
-                    key={idx}
+                    key={item.timestamp}
                     onClick={() => selectFromHistory(item)}
                     className={cn(
                       "flex-shrink-0 px-3 py-2 rounded-lg text-[10px] font-bold border transition-all",
-                      result === item 
+                      result?.timestamp === item.timestamp 
                         ? "bg-blue-500/20 border-blue-500/40 text-blue-300"
                         : "bg-white/5 border-white/5 text-slate-400 hover:bg-white/10 hover:text-white"
                     )}
