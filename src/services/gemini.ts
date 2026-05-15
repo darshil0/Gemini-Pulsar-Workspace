@@ -1,6 +1,6 @@
 import { GoogleGenAI, Type, Modality } from "@google/genai";
-import { EmailAnalysis, ImageTransformationResult, LiveVoiceCallbacks } from "../types";
-import { MODELS, SYSTEM_INSTRUCTIONS, VOICE_CONFIG } from "../constants";
+import { EmailAnalysis, ImageTransformationResult, LiveVoiceCallbacks } from "../config/types";
+import { MODELS, SYSTEM_INSTRUCTIONS, VOICE_CONFIG } from "../config/constants";
 
 // Initialize with lazy loading as per best practices
 let genAIInstance: GoogleGenAI | null = null;

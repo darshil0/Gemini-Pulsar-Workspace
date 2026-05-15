@@ -1,9 +1,9 @@
 import React, { useEffect, useRef } from 'react';
 import { Mic, MicOff, Waves, Volume2, Sparkles, MessageSquare, ExternalLink, Zap } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { useAudioLive } from '../hooks/useAudioLive';
-import { cn } from '../lib/utils';
-import { useNotification } from '../hooks/useNotification';
+import { useAudioLive } from '../../hooks/useAudioLive';
+import { cn } from '../../lib/utils';
+import { useNotification } from '../../context/NotificationContext';
 
 export const VocalWorkspace: React.FC = () => {
   const { notify } = useNotification();

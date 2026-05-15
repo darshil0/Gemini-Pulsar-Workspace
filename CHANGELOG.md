@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.6.0] - 2026-05-15
+### Changed
+- **Architectural Re-organization**: Refactored the project structure into a modular hierarchy:
+    - Moved workspace components to `src/components/workspaces`.
+    - Moved notification logic to `src/context/NotificationContext`.
+    - Moved types and constants to `src/config`.
+- Updated all import maps to reflect the new directory structure.
+
 ## [1.5.0] - 2026-05-15
 ### Added
 - **Global Notification System**: Implemented a subtle, non-blocking notification system (`useNotification`) for real-time feedback.

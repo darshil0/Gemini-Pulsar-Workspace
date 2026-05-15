@@ -1,10 +1,10 @@
 import React, { useState } from 'react';
 import { Mail, Send, Loader2, CheckCircle2, AlertCircle, Copy, Sparkles, User, Tag, Clock, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { analyzeEmail } from '../services/gemini';
-import { cn } from '../lib/utils';
-import { EmailAnalysis } from '../types';
-import { useNotification } from '../hooks/useNotification';
+import { analyzeEmail } from '../../services/gemini';
+import { cn } from '../../lib/utils';
+import { EmailAnalysis } from '../../config/types';
+import { useNotification } from '../../context/NotificationContext';
 
 /**
  * Intelligent Email Assistant component.

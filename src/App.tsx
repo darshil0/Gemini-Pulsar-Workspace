@@ -6,12 +6,12 @@
 import React, { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { Mail, Sparkles, Mic, Sun, Moon, LayoutGrid, Info, Zap, CheckCircle2 } from 'lucide-react';
-import { EmailHelper } from './components/EmailHelper';
-import { ImageStudio } from './components/ImageStudio';
-import { VocalWorkspace } from './components/VocalWorkspace';
+import { EmailHelper } from './components/workspaces/EmailHelper';
+import { ImageStudio } from './components/workspaces/ImageStudio';
+import { VocalWorkspace } from './components/workspaces/VocalWorkspace';
 import { cn } from './lib/utils';
-import { ActiveTab } from './types';
-import { NotificationProvider } from './hooks/useNotification';
+import { ActiveTab } from './config/types';
+import { NotificationProvider } from './context/NotificationContext';
 
 export default function App() {
   const [activeTab, setActiveTab] = useState<ActiveTab>('email');

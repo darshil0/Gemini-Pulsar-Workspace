@@ -1,7 +1,7 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { connectLiveVoice } from '../services/gemini';
 import { LiveServerMessage } from '@google/genai';
-import { VOICE_CONFIG, JITTER_BUFFER } from '../constants';
+import { VOICE_CONFIG, JITTER_BUFFER } from '../config/constants';
 
 /**
  * Hook to manage real-time audio interaction with Gemini Live.

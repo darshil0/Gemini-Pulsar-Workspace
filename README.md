@@ -56,11 +56,10 @@ The Image Studio uses a lazy-loading and proactive cleanup pattern:
 
 ## 🏗️ Architecture
 
-- `/src/components`: UI modules for Email, Image, and Voice workspaces.
-- `/src/hooks`: 
-    - `useAudioLive.ts`: Manages MediaStream, ScriptProcessor, and PCM->Base64 conversion for bidirectional Gemini Live audio.
-    - `useNotification.tsx`: Global notification context and provider logic.
-- `/src/services/gemini.ts`: Centralized service for SDK initialization and API calling patterns.
-- `/src/types.ts`: Centralized TypeScript interfaces for type-safe cross-component communication.
-- `/src/constants.ts`: Global configuration (sample rates, model names, style prompts).
-- `/src/index.css`: Global design system including Tailwind 4 variables and glassmorphism utilities.
+- `/src/components/workspaces`: Feature-specific modules for Email, Image, and Voice workspaces.
+- `/src/context`: Global application state providers (e.g., `NotificationContext.tsx`).
+- `/src/hooks`: Custom reactive logic hooks like `useAudioLive.ts`.
+- `/src/services`: Centralized API clients and service logic (e.g., `gemini.ts`).
+- `/src/config`: Global types and system constants.
+- `/src/lib`: Core utility functions and shared helpers.
+- `/src/App.tsx`: Main application shell and layout structure.

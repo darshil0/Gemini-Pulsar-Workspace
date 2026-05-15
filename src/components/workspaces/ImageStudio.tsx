@@ -1,11 +1,11 @@
 import React, { useState, useRef } from 'react';
 import { Upload, Image as ImageIcon, Sparkles, Download, Loader2, Wand2, Eraser, Layers, Palette, Camera, Grid, Trash2, Send, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
-import { transformImage } from '../services/gemini';
-import { cn } from '../lib/utils';
-import { IMAGE_STYLES } from '../constants';
-import { ImageTransformationResult } from '../types';
-import { useNotification } from '../hooks/useNotification';
+import { transformImage } from '../../services/gemini';
+import { cn } from '../../lib/utils';
+import { IMAGE_STYLES } from '../../config/constants';
+import { ImageTransformationResult } from '../../config/types';
+import { useNotification } from '../../context/NotificationContext';
 
 const iconMap: Record<string, any> = {
   Sparkles,
