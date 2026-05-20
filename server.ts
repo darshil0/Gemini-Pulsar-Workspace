@@ -42,6 +42,43 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
   next(err);
 });
 
+// Memory storage for rate limiting to protect API endpoints against resource exhaustion (Issue #21)
+const apiRateLimits: Record<string, { count: number; resetTime: number }> = {};
+function apiRateLimiter(windowMs: number, maxRequests: number) {
+  return (req: express.Request, res: express.Response, next: express.NextFunction) => {
+    const ip = (req.headers["x-forwarded-for"] as string) || req.socket.remoteAddress || "global_fallback_ip";
+    const now = Date.now();
+    
+    if (!apiRateLimits[ip] || now > apiRateLimits[ip].resetTime) {
+      apiRateLimits[ip] = {
+        count: 1,
+        resetTime: now + windowMs
+      };
+      res.setHeader("X-RateLimit-Limit", maxRequests);
+      res.setHeader("X-RateLimit-Remaining", maxRequests - 1);
+      res.setHeader("X-RateLimit-Reset", Math.ceil(apiRateLimits[ip].resetTime / 1000));
+      return next();
+    }
+    
+    if (apiRateLimits[ip].count >= maxRequests) {
+      res.setHeader("X-RateLimit-Limit", maxRequests);
+      res.setHeader("X-RateLimit-Remaining", 0);
+      res.setHeader("X-RateLimit-Reset", Math.ceil(apiRateLimits[ip].resetTime / 1000));
+      const retryAfterSeconds = Math.ceil((apiRateLimits[ip].resetTime - now) / 1000);
+      res.setHeader("Retry-After", retryAfterSeconds);
+      return res.status(429).json({ 
+        error: `Too many requests. Rate limit exceeded. Try again in ${retryAfterSeconds} seconds.` 
+      });
+    }
+    
+    apiRateLimits[ip].count += 1;
+    res.setHeader("X-RateLimit-Limit", maxRequests);
+    res.setHeader("X-RateLimit-Remaining", maxRequests - apiRateLimits[ip].count);
+    res.setHeader("X-RateLimit-Reset", Math.ceil(apiRateLimits[ip].resetTime / 1000));
+    next();
+  };
+}
+
 // Gemini client lazy initialization
 let genAI: GoogleGenAI | null = null;
 function getAI() {
@@ -68,7 +105,7 @@ app.get("/api/health", (req, res) => {
 
 // REMOVED /api/config endpoint to lock down API key security (Issue #1)
 
-app.post("/api/analyze-email", async (req, res) => {
+app.post("/api/analyze-email", apiRateLimiter(60000, 20), async (req, res) => {
   try {
     const { emailContent } = req.body;
     if (!emailContent || typeof emailContent !== "string") {
@@ -120,7 +157,7 @@ app.post("/api/analyze-email", async (req, res) => {
   }
 });
 
-app.post("/api/transform-image", async (req, res) => {
+app.post("/api/transform-image", apiRateLimiter(60000, 20), async (req, res) => {
   try {
     const { imageBase64, mimeType, instruction } = req.body;
 
