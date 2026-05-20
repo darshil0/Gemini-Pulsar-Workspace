@@ -4,14 +4,18 @@ All notable changes to this project will be documented in this file.
 
 ## [1.7.3] - 2026-05-20
 ### Added
-- **Secure Server-Side WebSocket Proxy**: Implemented a secure Node.js proxy (`server.ts`) to manage Live Voice audio streaming pipelines, completely removing the `/api/config` endpoint and the need to expose raw API keys to the client.
-- **Service Payload Safety Enforcement**: Configured rigid Express body limits of `4MB` to guard the image transformation backend against oversized base64 uploads and trigger structural `413 Payload Too Large` responses.
-- **Explicit CORS Integration**: Configured formal server CORS middleware validation to protect endpoint visibility.
+- **Secure Server-Side WebSocket Proxy**: Implemented a secure Node.js proxy (`server.ts`) to manage Live Voice audio streaming pipelines, completely removing the `/api/config` endpoint and the need to expose raw API keys to the client (Issue #1).
+- **Service Payload Safety Enforcement**: Configured rigid Express body limits of `4MB` to guard the image transformation backend against oversized base64 uploads and trigger structural `413 Payload Too Large` responses (Issue #2).
+- **Explicit CORS Integration**: Configured formal server CORS middleware validation to protect endpoint visibility (Issue #3).
+- **Request Tracking Middleware & Observability**: Integrated request tracking middleware checking latencies, endpoints, and status codes via random-generated high-entropy tracer IDs, writing details safely to server logs (Issue #27).
+- **System Health Handshakes Documentation**: Exposed a lightweight health handshake probe (`/api/health`) to identify deployment status and documented deployment probes and dynamic port bindings in `README.md` (Issue #6, #23).
 
 ### Fixed
-- **Memory safety on unmount**: Added passive `useEffect` hooks in the `ImageStudio` and `NotificationProvider` to systematically release active object blobs and clean up active `setTimeout` handles during natural view unmounting.
-- **Timestamp Key Collision**: Appended high-entropy fractional random components to the history item generation layout in `EmailHelper` to completely isolate the layout against unique key collisions.
-- **Type Compiler Errors**: Corrected implicit `any` parameter mappings on AudioWorklet message processing callback hooks and fixed Express server listening arguments.
+- **AudioWorklet Session Sequence Checks**: Implemented session index generation markers inside `useAudioLive` to insulate binary stream threads against race conditions if connection toggles occur rapidly (Issue #4).
+- **Memory safety on unmount**: Added passive `useEffect` hooks in the `ImageStudio` and `NotificationProvider` to systematically release active object blobs and clean up active `setTimeout` handles during natural view unmounting (Issue #5, #11).
+- **History Timestamp Unique Safety**: Appended high-entropy fractional random components to the history item generation layout in `EmailHelper` to completely isolate the layout against unique key collisions (Issue #17).
+- **Type Compiler Errors**: Added strict type parameters on AudioWorklet message processing callback hooks and fixed Express server listening constraints (Issue #14).
+- **PII-Guarded Error Narrowing**: Implemented robust type narrowing across catch blocks in Email Helper and Image Studio to safely bubble clean messages without leaking internal trace parameters or structured payload variables (Issue #7, #20).
 
 ## [1.7.2] - 2026-05-20
 ### Added
