@@ -2,6 +2,14 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.7.2] - 2026-05-20
+### Added
+- **API Architecture Documentation**: Fully documented the full-stack proxy design, validation schemas, and local health handshake endpoints in the `README.md`.
+
+### Fixed
+- **Live Session Race Safety**: Fixed a critical micro-race condition inside the AudioWorklet messages stream callback in `useAudioLive.ts`. It now does a strict validation check against the active ref and session identity before forwarding PCM frames to Gemini.
+- **Model Standard Alignment**: Aligned the developer contribution guide (`CONTRIBUTING.md`) and readme files with production configurations to avoid system mismatch.
+
 ## [1.7.1] - 2026-05-15
 ### Added
 - **Security Checkpoint**: Implemented `/api/health` to allow the client to verify API key presence without exposing the key itself.
