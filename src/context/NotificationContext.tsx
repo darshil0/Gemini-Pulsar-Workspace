@@ -1,4 +1,4 @@
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode, useRef, useEffect } from 'react';
 import { AnimatePresence, motion } from 'motion/react';
 import { X, CheckCircle2, AlertCircle, Info, Bell } from 'lucide-react';
 import { cn } from '../lib/utils';
@@ -20,6 +20,7 @@ const NotificationContext = createContext<NotificationContextType | undefined>(u
 
 export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
+  const timeoutsRef = useRef<Record<string, NodeJS.Timeout>>({});
 
   const notify = useCallback((type: NotificationType, message: string, description?: string) => {
     const id = typeof crypto !== 'undefined' && crypto.randomUUID 
@@ -28,14 +29,28 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
     setNotifications(prev => [...prev, { id, type, message, description }]);
 
     // Auto-remove after 5 seconds
-    setTimeout(() => {
+    const timeoutId = setTimeout(() => {
       setNotifications(prev => prev.filter(n => n.id !== id));
+      delete timeoutsRef.current[id];
     }, 5000);
+
+    timeoutsRef.current[id] = timeoutId;
   }, []);
 
   const removeNotification = (id: string) => {
     setNotifications(prev => prev.filter(n => n.id !== id));
+    if (timeoutsRef.current[id]) {
+      clearTimeout(timeoutsRef.current[id]);
+      delete timeoutsRef.current[id];
+    }
   };
+
+  useEffect(() => {
+    return () => {
+      // Clean up all active timers on unmount to prevent leaks
+      Object.values(timeoutsRef.current).forEach(clearTimeout);
+    };
+  }, []);
 
   return (
     <NotificationContext.Provider value={{ notify }}>

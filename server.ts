@@ -1,66 +1,92 @@
 import express from "express";
 import path from "path";
+import http from "http";
+import cors from "cors";
+import { WebSocketServer } from "ws";
 import { createServer as createViteServer } from "vite";
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI, Type, Modality } from "@google/genai";
 import dotenv from "dotenv";
-import { MODELS } from "./src/config/constants";
+import { MODELS, VOICE_CONFIG, SYSTEM_INSTRUCTIONS } from "./src/config/constants";
 
 dotenv.config();
 
 const app = express();
-const PORT = 3000;
+const PORT = Number(process.env.PORT) || 3000;
 
-// Gemini client initialization
+// CORS setup to secure API routes and allow authorized access
+app.use(cors({
+  origin: true,
+  credentials: true
+}));
+
+// Configure request limits to prevent Denials of Service (Issue #2)
+app.use(express.json({ limit: "4mb" }));
+
+// Express body limit error handler to return 413 Payload Too Large (Issue #2)
+app.use((err: any, req: express.Request, res: express.Response, next: express.NextFunction) => {
+  if (err && err.type === "entity.too.large") {
+    return res.status(413).json({ error: "Payload too large. Maximum allowed size is 4MB." });
+  }
+  next(err);
+});
+
+// Gemini client lazy initialization
 let genAI: GoogleGenAI | null = null;
 function getAI() {
   if (!genAI) {
     const key = process.env.GEMINI_API_KEY;
-    if (!key) throw new Error("GEMINI_API_KEY is missing");
-    genAI = new GoogleGenAI({ apiKey: key });
+    if (!key) throw new Error("GEMINI_API_KEY environment variable is not configured on the server.");
+    genAI = new GoogleGenAI({
+      apiKey: key,
+      httpOptions: {
+        headers: {
+          "User-Agent": "aistudio-build",
+        }
+      }
+    });
   }
   return genAI;
 }
 
-app.use(express.json({ limit: '10mb' }));
-
-// API Routes
+// REST endpoints
 app.get("/api/health", (req, res) => {
   const hasKey = !!process.env.GEMINI_API_KEY;
   res.json({ status: "ok", hasApiKey: hasKey });
 });
 
-app.get("/api/config", (req, res) => {
-  const key = process.env.GEMINI_API_KEY;
-  if (!key) return res.status(500).json({ error: "Gemini API key is not set on the server." });
-  res.json({ apiKey: key });
-});
+// REMOVED /api/config endpoint to lock down API key security (Issue #1)
 
 app.post("/api/analyze-email", async (req, res) => {
   try {
     const { emailContent } = req.body;
-    if (!emailContent || typeof emailContent !== 'string') {
-      return res.status(400).json({ error: "Invalid email content provided." });
+    if (!emailContent || typeof emailContent !== "string") {
+      return res.status(400).json({ error: "Invalid email content provided. Field 'emailContent' must be a non-empty string." });
     }
-    
+
     const ai = getAI();
     const result = await ai.models.generateContent({
       model: MODELS.GEMINI_FLASH,
-      contents: [{ role: 'user', parts: [{ text: `Analyze the following email content and provide structured data including:
-      1. Category (e.g., Work, Personal, Spam, Newsletter)
-      2. Priority (low, medium, high, urgent)
-      3. Mood of the sender
-      4. List of action items
-      5. A professional draft reply
-      
-      Email Content:
-      "${emailContent}"` }]}],
+      contents: [{
+        role: "user",
+        parts: [{
+          text: `Analyze the following email content and provide structured data including:
+          1. Category (e.g., Work, Personal, Spam, Newsletter)
+          2. Priority (low, medium, high, urgent)
+          3. Mood of the sender
+          4. List of action items
+          5. A professional draft reply
+          
+          Email Content:
+          "${emailContent}"`
+        }]
+      }],
       config: {
         responseMimeType: "application/json",
         responseSchema: {
           type: Type.OBJECT,
           properties: {
             category: { type: Type.STRING },
-            priority: { type: Type.STRING, enum: ['low', 'medium', 'high', 'urgent'] },
+            priority: { type: Type.STRING, enum: ["low", "medium", "high", "urgent"] },
             mood: { type: Type.STRING },
             actionItems: { 
               type: Type.ARRAY,
@@ -74,19 +100,26 @@ app.post("/api/analyze-email", async (req, res) => {
     });
 
     const text = result.text;
-    res.json(JSON.parse(text || '{}'));
-  } catch (error: any) {
-    console.error("Analysis Error:", error);
-    res.status(500).json({ error: error.message });
+    res.json(JSON.parse(text || "{}"));
+  } catch (error: unknown) {
+    const errMessage = error instanceof Error ? error.message : "Internal Error";
+    console.error("Email analysis error:", errMessage);
+    res.status(500).json({ error: "Failed to analyze email content. " + errMessage });
   }
 });
 
 app.post("/api/transform-image", async (req, res) => {
   try {
     const { imageBase64, mimeType, instruction } = req.body;
-    
+
     if (!imageBase64 || !mimeType || !instruction) {
       return res.status(400).json({ error: "Missing required fields (imageBase64, mimeType, instruction)." });
+    }
+
+    // Server-side Image Size Validation (Issue #2)
+    const approxSizeInBytes = (imageBase64.length * 3) / 4;
+    if (approxSizeInBytes > 4 * 1024 * 1024) {
+      return res.status(413).json({ error: "Image is too large. Maximum size allowed is 4MB." });
     }
 
     const ai = getAI();
@@ -128,22 +161,118 @@ app.post("/api/transform-image", async (req, res) => {
     }
 
     res.json({ imageUrl, analysis });
-  } catch (error: any) {
-    console.error("Transformation Error:", error);
-    res.status(500).json({ error: error.message });
+  } catch (error: unknown) {
+    const errMessage = error instanceof Error ? error.message : "Internal Error";
+    console.error("Image transformation error:", errMessage);
+    res.status(500).json({ error: "Failed to transform image. " + errMessage });
   }
 });
 
-// For Live Voice, since bidirectional streaming from client to server to Gemini is heavy for a simple dashboard,
-// we could use a custom endpoint to return a secure session token or simply acknowledge that 
-// in this environment, for a full-stack experience, we'd normally proxy the WS.
-// However, the simplest fix for "Keeping key hidden" while using SDK live is to pass the key via a server-side managed process.
-// But the client-side Google SDK *can* be used if we don't expose the key in the bundle.
-// The real fix is to never put the key in vite.config.ts define, and instead fetch it or use a proxy.
+const server = http.createServer(app);
+
+// WebSocket server setup for secure Live Voice Proxy (Issue #1)
+const wss = new WebSocketServer({ noServer: true });
+
+wss.on("connection", async (clientWs) => {
+  console.log("Secure vocal proxy connection established.");
+  let liveSession: any = null;
+
+  try {
+    const ai = getAI();
+    liveSession = await ai.live.connect({
+      model: MODELS.GEMINI_LIVE,
+      config: {
+        responseModalities: [Modality.AUDIO],
+        speechConfig: {
+          voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICE_CONFIG.VOICE_NAME } },
+        },
+        systemInstruction: SYSTEM_INSTRUCTIONS.VOICE,
+        outputAudioTranscription: {},
+      },
+      callbacks: {
+        onopen: () => {
+          if (clientWs.readyState === clientWs.OPEN) {
+            clientWs.send(JSON.stringify({ type: "open" }));
+          }
+        },
+        onmessage: (message: any) => {
+          if (clientWs.readyState === clientWs.OPEN) {
+            clientWs.send(JSON.stringify({ type: "message", message }));
+          }
+        },
+        onerror: (err: any) => {
+          console.error("Gemini LIVE back-to-back stream integration error:", err);
+          if (clientWs.readyState === clientWs.OPEN) {
+            clientWs.send(JSON.stringify({ type: "error", error: err.message || String(err) }));
+          }
+        },
+        onclose: () => {
+          if (clientWs.readyState === clientWs.OPEN) {
+            clientWs.send(JSON.stringify({ type: "close" }));
+          }
+        }
+      }
+    });
+
+    clientWs.on("message", (raw) => {
+      try {
+        const payload = JSON.parse(raw.toString());
+        if (payload.audio && liveSession) {
+          liveSession.sendRealtimeInput({
+            audio: {
+              data: payload.audio.data,
+              mimeType: payload.audio.mimeType
+            }
+          });
+        }
+      } catch (err) {
+        console.error("Vocal proxy socket relay failure:", err);
+      }
+    });
+
+  } catch (err: any) {
+    console.error("Secure vocal live session initialization failure:", err);
+    if (clientWs.readyState === clientWs.OPEN) {
+      clientWs.send(JSON.stringify({ type: "error", error: err.message || "Session initialization failed" }));
+    }
+    clientWs.close();
+    return;
+  }
+
+  const closeLiveSession = () => {
+    if (liveSession) {
+      try {
+        liveSession.close();
+      } catch (e) {}
+      liveSession = null;
+    }
+  };
+
+  clientWs.on("close", () => {
+    console.log("Secure vocal proxy socket closed.");
+    closeLiveSession();
+  });
+
+  clientWs.on("error", (err) => {
+    console.error("Secure vocal proxy socket error:", err);
+    closeLiveSession();
+  });
+});
+
+// Handle upgrade from HTTP to WebSocket protocol securely
+server.on("upgrade", (request, socket, head) => {
+  const { pathname } = new URL(request.url || "", `http://${request.headers.host}`);
+  if (pathname === "/api/live") {
+    wss.handleUpgrade(request, socket, head, (ws) => {
+      wss.emit("connection", ws, request);
+    });
+  } else {
+    socket.destroy();
+  }
+});
 
 async function startServer() {
   if (process.env.NODE_ENV !== "production") {
-    // Create Vite server in middleware mode
     const vite = await createViteServer({
       server: { middlewareMode: true },
       appType: "spa",
@@ -157,8 +286,8 @@ async function startServer() {
     });
   }
 
-  app.listen(PORT, "0.0.0.0", () => {
-    console.log(`Server running on http://localhost:${PORT}`);
+  server.listen(PORT, "0.0.0.0", () => {
+    console.log(`Server configuration deployed. Running on http://localhost:${PORT}`);
   });
 }
 

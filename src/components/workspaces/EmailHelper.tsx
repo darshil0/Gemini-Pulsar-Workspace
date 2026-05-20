@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Mail, Send, Loader2, CheckCircle2, AlertCircle, Copy, Sparkles, User, Tag, Clock, Trash2 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { analyzeEmail } from '../../services/gemini';
@@ -18,6 +18,16 @@ export const EmailHelper: React.FC = () => {
   const [result, setResult] = useState<HistoryItem| null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
+  
+  const copyTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
+    };
+  }, []);
   const [history, setHistory] = useState<HistoryItem[]>(() => {
     try {
       const saved = localStorage.getItem('email_analysis_history');
@@ -44,7 +54,7 @@ export const EmailHelper: React.FC = () => {
     setError(null);
     try {
       const data = await analyzeEmail(input);
-      const newItem = { ...data, timestamp: Date.now() };
+      const newItem = { ...data, timestamp: Date.now() + Math.random() };
       setResult(newItem);
       notify('success', 'Analysis Complete', `Email identified as ${data.category} with ${data.priority} priority.`);
       
@@ -75,10 +85,17 @@ export const EmailHelper: React.FC = () => {
 
   const copyToClipboard = async (text: string) => {
     try {
+      if (copyTimeoutRef.current) {
+        clearTimeout(copyTimeoutRef.current);
+      }
       await navigator.clipboard.writeText(text);
       setIsCopied(true);
       notify('success', 'Copied to Clipboard', 'The draft response is ready to be pasted.');
-      setTimeout(() => setIsCopied(false), 2000);
+      
+      copyTimeoutRef.current = setTimeout(() => {
+        setIsCopied(false);
+        copyTimeoutRef.current = null;
+      }, 4000); // Extended notification window
     } catch (err) {
       notify('error', 'Copy Failed', 'Could not access clipboard.');
       console.error("Failed to copy text:", err);

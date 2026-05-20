@@ -3,8 +3,7 @@ import {
   ImageTransformationResult, 
   LiveVoiceCallbacks 
 } from "../config/types";
-import { MODELS, SYSTEM_INSTRUCTIONS, VOICE_CONFIG } from "../config/constants";
-import { GoogleGenAI, Modality } from "@google/genai";
+import { MODELS, VOICE_CONFIG } from "../config/constants";
 
 /**
   * Analyzes an email's content using the backend proxy.
@@ -42,33 +41,54 @@ export const transformImage = async (
 };
 
 /**
-  * Establishes a live WebSocket connection for low-latency voice interaction.
+  * Establishes a live WebSocket connection via the server-side proxy for secure, low-latency voice interaction.
   */
 export const connectLiveVoice = async (callbacks: LiveVoiceCallbacks) => {
-  // Fetch key securely at runtime (Issue #1, #20)
-  const configResponse = await fetch("/api/config");
-  if (!configResponse.ok) throw new Error("Failed to fetch runtime configuration");
-  const { apiKey } = await configResponse.json();
-  
-  const genAI = new GoogleGenAI({ apiKey });
-  
-  return genAI.live.connect({
-    model: MODELS.GEMINI_LIVE,
-    config: {
-      responseModalities: [Modality.AUDIO],
-      speechConfig: {
-        voiceConfig: { prebuiltVoiceConfig: { voiceName: VOICE_CONFIG.VOICE_NAME } },
-      },
-      systemInstruction: SYSTEM_INSTRUCTIONS.VOICE,
-      outputAudioTranscription: {},
-    },
-    callbacks: {
-      onopen: callbacks.onopen || (() => {}),
-      onmessage: callbacks.onmessage || (() => {}),
-      onerror: callbacks.onerror || (() => {}),
-      onclose: callbacks.onclose || (() => {}),
+  const protocol = window.location.protocol === "https:" ? "wss:" : "ws:";
+  const wsUrl = `${protocol}//${window.location.host}/api/live`;
+  const ws = new WebSocket(wsUrl);
+
+  ws.onopen = () => {
+    // Connection established; wait for server-side Gemini live ready signal
+  };
+
+  ws.onmessage = (event) => {
+    try {
+      const data = JSON.parse(event.data);
+      if (data.type === 'open') {
+        if (callbacks.onopen) callbacks.onopen();
+      } else if (data.type === 'message') {
+        if (callbacks.onmessage) callbacks.onmessage(data.message);
+      } else if (data.type === 'error') {
+        if (callbacks.onerror) callbacks.onerror(new Error(data.error));
+      } else if (data.type === 'close') {
+        if (callbacks.onclose) callbacks.onclose();
+      }
+    } catch (err) {
+      console.error("Vocal frame client parsing failure:", err);
     }
-  });
+  };
+
+  ws.onerror = (err) => {
+    if (callbacks.onerror) callbacks.onerror(err);
+  };
+
+  ws.onclose = () => {
+    if (callbacks.onclose) callbacks.onclose();
+  };
+
+  return {
+    sendRealtimeInput: (input: any) => {
+      if (ws.readyState === WebSocket.OPEN) {
+        ws.send(JSON.stringify({ audio: input.audio }));
+      }
+    },
+    close: () => {
+      if (ws.readyState === WebSocket.OPEN || ws.readyState === WebSocket.CONNECTING) {
+        ws.close();
+      }
+    }
+  };
 };
 
 

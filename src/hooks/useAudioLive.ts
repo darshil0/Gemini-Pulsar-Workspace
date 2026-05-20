@@ -1,6 +1,5 @@
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { connectLiveVoice } from '../services/gemini';
-import { LiveServerMessage } from '@google/genai';
 import { VOICE_CONFIG, JITTER_BUFFER } from '../config/constants';
 
 /**
@@ -120,8 +119,8 @@ export const useAudioLive = () => {
       `;
       const blob = new Blob([processorCode], { type: 'application/javascript' });
       const workletUrl = URL.createObjectURL(blob);
-      await audioContext.audioWorklet.addModule(workletUrl);
       workletUrlRef.current = workletUrl;
+      await audioContext.audioWorklet.addModule(workletUrl);
       
       const workletNode = new AudioWorkletNode(audioContext, 'audio-processor');
       workletRef.current = workletNode;
@@ -137,9 +136,9 @@ export const useAudioLive = () => {
           isActiveRef.current = true;
           console.log("Connected to Gemini Live");
         },
-        onmessage: async (message: LiveServerMessage) => {
+        onmessage: async (message: any) => {
           // Transcription handling - Truncate to prevent memory bloat over time
-          const transcriptionPart = message.serverContent?.modelTurn?.parts?.find(p => p.text);
+          const transcriptionPart = message.serverContent?.modelTurn?.parts?.find((p: any) => p.text);
           if (transcriptionPart?.text) {
              setTranscription(prev => {
                const combined = prev + transcriptionPart.text;
@@ -147,7 +146,7 @@ export const useAudioLive = () => {
              });
           }
           
-          const audioPart = message.serverContent?.modelTurn?.parts?.find(p => p.inlineData);
+          const audioPart = message.serverContent?.modelTurn?.parts?.find((p: any) => p.inlineData);
           if (audioPart?.inlineData?.data && audioContextRef.current && audioContextRef.current.state !== 'closed') {
             const base64 = audioPart.inlineData.data;
             const binary = atob(base64);

@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useState, useRef, useEffect } from 'react';
 import { Upload, Image as ImageIcon, Sparkles, Download, Loader2, Wand2, Eraser, Layers, Palette, Camera, Grid, Trash2, Send, AlertCircle } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { transformImage } from '../../services/gemini';
@@ -26,6 +26,21 @@ export const ImageStudio: React.FC = () => {
   
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageBase64Ref = useRef<string | null>(null);
+  const imageRef = useRef<string | null>(null);
+
+  // Sync active image state with a ref to assist garbage collection on unmount
+  useEffect(() => {
+    imageRef.current = image;
+  }, [image]);
+
+  useEffect(() => {
+    return () => {
+      // Clear object URL on unmount to completely guarantee memory reclamation
+      if (imageRef.current && imageRef.current.startsWith('blob:')) {
+        URL.revokeObjectURL(imageRef.current);
+      }
+    };
+  }, []);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -70,12 +85,19 @@ export const ImageStudio: React.FC = () => {
   };
 
   const processImg = async (stylePrompt?: string) => {
+    const finalPrompt = (stylePrompt || prompt || "").trim();
+    if (!finalPrompt) {
+      setError("Please select a quick style or input a custom remix instruction.");
+      notify('error', 'Transformation Stopped', 'No remix instructions were provided.');
+      return;
+    }
+
     const b64 = imageBase64Ref.current;
     if (!b64) return;
     setIsProcessing(true);
     setError(null);
     try {
-      const data = await transformImage(b64, mimeType, stylePrompt || prompt);
+      const data = await transformImage(b64, mimeType, finalPrompt);
       setResult(data);
       notify('success', 'Transformation Complete', 'Your image has been re-imagined by Gemini Vision.');
     } catch (err) {

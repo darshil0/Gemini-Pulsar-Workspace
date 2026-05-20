@@ -1,5 +1,3 @@
-import { LiveServerMessage } from "@google/genai";
-
 /**
  * Core type definitions for Google Pulsar Workspace
  */
@@ -23,7 +21,7 @@ export type ActiveTab = 'email' | 'image' | 'voice' | 'settings';
 
 export interface LiveVoiceCallbacks {
   onopen?: () => void;
-  onmessage?: (message: LiveServerMessage) => void;
+  onmessage?: (message: any) => void;
   onerror?: (error: any) => void;
   onclose?: () => void;
 }
