@@ -32,8 +32,14 @@ The Email Helper implements a "Transient Persistence" model:
 
 ### 3. Binary Asset Optimization & Safety
 The Image Studio uses a lazy-loading and proactive cleanup pattern:
-- **Memory Safety**: Every uploaded or generated image URL is created via `URL.createObjectURL` and explicitly destroyed via `URL.revokeObjectURL` when the session is cleared or the image is replaced to prevent memory leaks in long sessions.
+- **Memory Safety**: Every uploaded or generated image URL is created via `URL.createObjectURL` and explicitly destroyed via `URL.revokeObjectURL` (both script worklet URLs and user imagery) when the session is cleared or the image is replaced to prevent memory leaks in long sessions.
 - **Error Boundaries**: Comprehensive error handling for image analysis failures with detailed UI feedback.
+
+### 4. Full-Stack Proxy & API Security Architecture
+To guarantee API key secrecy and full compliance with our security standards:
+- **Server-Side API Proxy**: Raw `GEMINI_API_KEY` is maintained exclusively inside Node.js (`server.ts`). Client tasks such as email analysis and image transformation are proxied through local REST endpoints (`/api/*`).
+- **Endpoint validation**: Server routes validate payloads immediately, preventing unhandled exceptions and returning standard validation errors (400 Bad Request) on empty inputs.
+- **Client Handshake**: The user interface does not expose or directly manipulate raw secrets. Instead, it queries the non-leaking `/api/health` status handshake on load to render the "System Ready" indicators and workspace states.
 
 ## 🛠️ Tech Stack
 
@@ -42,10 +48,10 @@ The Image Studio uses a lazy-loading and proactive cleanup pattern:
 - **Animation**: Framer Motion (`motion/react`)
 - **Data Viz**: D3.js + Recharts
 - **Utilities**: Date-fns
-- **AI Backend**: Google GenAI SDK
-    - **Processing**: `gemini-3-flash-preview`
-    - **Vision**: `gemini-2.5-flash-image`
-    - **Multimodal Live**: `gemini-3.1-flash-live-preview`
+- **AI Backend**: Google GenAI SDK (Node-level with secure local runtime queries)
+    - **Processing**: `gemini-1.5-flash`
+    - **Vision**: `gemini-1.5-flash`
+    - **Multimodal Live**: `gemini-2.0-flash-exp`
 - **Icons**: Lucide React
 
 ## 🚥 Getting Started
