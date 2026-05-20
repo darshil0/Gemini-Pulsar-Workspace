@@ -59,14 +59,15 @@ export const EmailHelper: React.FC = () => {
       notify('success', 'Analysis Complete', `Email identified as ${data.category} with ${data.priority} priority.`);
       
       setHistory(prev => {
-        const newHistory = [newItem, ...prev].slice(0, 5);
-        localStorage.setItem('email_analysis_history', JSON.stringify(newHistory));
-        return newHistory;
+         const newHistory = [newItem, ...prev].slice(0, 5);
+         localStorage.setItem('email_analysis_history', JSON.stringify(newHistory));
+         return newHistory;
       });
-    } catch (err) {
-      setError('Failed to analyze email. Please try again.');
-      notify('error', 'Analysis Failed', 'There was an issue processing your email thread.');
-      console.error(err);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown processor error';
+      setError(`Failed to analyze email: ${msg}`);
+      notify('error', 'Analysis Failed', msg);
+      console.error('Email analysis error:', msg);
     } finally {
       setIsAnalyzing(false);
     }

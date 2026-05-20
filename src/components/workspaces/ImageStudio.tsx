@@ -100,10 +100,11 @@ export const ImageStudio: React.FC = () => {
       const data = await transformImage(b64, mimeType, finalPrompt);
       setResult(data);
       notify('success', 'Transformation Complete', 'Your image has been re-imagined by Gemini Vision.');
-    } catch (err) {
-      setError("Image transformation failed. Ensure image size is within limits (max 4MB).");
-      notify('error', 'Transformation Failed', 'There was an issue processing your image asset.');
-      console.error(err);
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : 'Unknown image transformation error';
+      setError(`Image transformation failed: ${msg}. (Max file size: 4MB).`);
+      notify('error', 'Transformation Failed', msg);
+      console.error('Image transformation error:', msg);
     } finally {
       setIsProcessing(false);
     }

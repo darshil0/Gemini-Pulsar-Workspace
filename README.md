@@ -41,6 +41,12 @@ To guarantee API key secrecy and full compliance with our security standards:
 - **Endpoint validation**: Server routes validate payloads immediately, preventing unhandled exceptions and returning standard validation errors (400 Bad Request) on empty inputs.
 - **Client Handshake**: The user interface does not expose or directly manipulate raw secrets. Instead, it queries the non-leaking `/api/health` status handshake on load to render the "System Ready" indicators and workspace states.
 
+### 5. Deployment, Health Checks & Observability (Issue #23, #27)
+For seamless integration into containerized orchestrators (e.g., Kubernetes, Cloud Run):
+- **Health Handshakes**: The `/api/health` path exposes a lightweight probe checking whether server configuration keys exist. It returns `{ "status": "ok", "hasApiKey": true }` to identify deployment health status immediately.
+- **Request Tracing Middleware**: A structured logging engine generates high-entropy tracking headers (in the form of `x-request-id`) for incoming REST payloads, rendering exact latencies and status codes in stdout.
+- **Port Dynamic Binding**: The service automatically conforms to generic container standards by binding dynamically to `process.env.PORT` before defaulting to local fallback `3000`.
+
 ## 🛠️ Tech Stack
 
 - **Framework**: React 18 + Vite

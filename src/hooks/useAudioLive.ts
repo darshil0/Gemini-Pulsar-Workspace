@@ -19,6 +19,7 @@ export const useAudioLive = () => {
   const audioContextRef = useRef<AudioContext | null>(null);
   const streamRef = useRef<MediaStream | null>(null);
   const sessionRef = useRef<any>(null); // Ideally use type from @google/genai when available
+  const sessionIndexRef = useRef<number>(0);
   const activeSourcesRef = useRef<AudioBufferSourceNode[]>([]);
 
   const nextPlayTimeRef = useRef<number>(0);
@@ -86,6 +87,9 @@ export const useAudioLive = () => {
     setTranscription('');
 
     try {
+      const newSessionIndex = Math.random();
+      sessionIndexRef.current = newSessionIndex;
+
       const audioContext = new (window.AudioContext || (window as any).webkitAudioContext)({ 
         sampleRate: VOICE_CONFIG.INPUT_SAMPLE_RATE 
       });
@@ -204,7 +208,8 @@ export const useAudioLive = () => {
 
       workletNode.port.onmessage = (event) => {
         const session = sessionRef.current;
-        if (!session || !isActiveRef.current) return;
+        const currentSessionIndex = sessionIndexRef.current;
+        if (!session || !isActiveRef.current || currentSessionIndex !== newSessionIndex) return;
         
         const inputData = event.data;
         const pcm16 = new Int16Array(inputData.length);
@@ -215,7 +220,7 @@ export const useAudioLive = () => {
         const base64 = arrayBufferToBase64(pcm16.buffer);
         try {
           // Final check to ensure we haven't stopped mid-processing
-          if (isActiveRef.current && sessionRef.current === session) {
+          if (isActiveRef.current && sessionRef.current === session && sessionIndexRef.current === currentSessionIndex) {
             session.sendRealtimeInput({
               audio: { data: base64, mimeType: `audio/pcm;rate=${VOICE_CONFIG.INPUT_SAMPLE_RATE}` }
             });

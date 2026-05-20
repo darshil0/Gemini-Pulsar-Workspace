@@ -19,6 +19,18 @@ app.use(cors({
   credentials: true
 }));
 
+// Request Tracking Middleware for system observability (Issue #27)
+app.use((req, res, next) => {
+  const reqId = Math.random().toString(36).substring(2, 10).toUpperCase() + "_" + Date.now();
+  req.headers["x-request-id"] = reqId;
+  const start = Date.now();
+  res.on("finish", () => {
+    const elapsed = Date.now() - start;
+    console.log(`[SYS-TRACK] id=${reqId} method=${req.method} path=${req.path} status=${res.statusCode} elapsed=${elapsed}ms`);
+  });
+  next();
+});
+
 // Configure request limits to prevent Denials of Service (Issue #2)
 app.use(express.json({ limit: "4mb" }));
 
