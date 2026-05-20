@@ -1,7 +1,7 @@
 {
   "name": "google-pulsar-workspace",
   "private": true,
-  "version": "1.7.3",
+  "version": "1.7.0",
   "description": "A high-performance AI dashboard with multi-modal capabilities powered by Gemini.",
   "type": "module",
   "scripts": {
