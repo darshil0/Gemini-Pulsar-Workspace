@@ -7,6 +7,13 @@ A high-performance AI dashboard featuring an intelligent email assistant, genera
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue.svg?logo=typescript&logoColor=white)]()
 [![React](https://img.shields.io/badge/React-19.0-61DAFB.svg?logo=react&logoColor=black)]()
 [![Vite](https://img.shields.io/badge/Vite-8.0-646CFF.svg?logo=vite&logoColor=white)]()
+[![Node.js](https://img.shields.io/badge/Node.js-20.x-339933.svg?logo=node.js&logoColor=white)]()
+[![Express](https://img.shields.io/badge/Express-4.x-000000.svg?logo=express&logoColor=white)]()
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-4.0-06B6D4.svg?logo=tailwind-css&logoColor=white)]()
+[![Framer Motion](https://img.shields.io/badge/Framer%20Motion-11.0-F024B6.svg?logo=framer&logoColor=white)]()
+[![Google Gemini](https://img.shields.io/badge/Google%20Gemini-2.0-4285F4.svg?logo=google-gemini&logoColor=white)]()
+[![D3.js](https://img.shields.io/badge/D3.js-7.x-F9A03F.svg?logo=d3.js&logoColor=white)]()
+[![Recharts](https://img.shields.io/badge/Recharts-2.x-22B573.svg)]()
 
 ## 🚀 Features
 
