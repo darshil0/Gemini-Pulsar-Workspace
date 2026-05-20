@@ -142,15 +142,14 @@ app.post("/api/transform-image", async (req, res) => {
 // The real fix is to never put the key in vite.config.ts define, and instead fetch it or use a proxy.
 
 async function startServer() {
-  // Create Vite server in middleware mode
-  const vite = await createViteServer({
-    server: { middlewareMode: true },
-    appType: "spa",
-  });
-
-  app.use(vite.middlewares);
-
-  if (process.env.NODE_ENV === "production") {
+  if (process.env.NODE_ENV !== "production") {
+    // Create Vite server in middleware mode
+    const vite = await createViteServer({
+      server: { middlewareMode: true },
+      appType: "spa",
+    });
+    app.use(vite.middlewares);
+  } else {
     const distPath = path.join(process.cwd(), "dist");
     app.use(express.static(distPath));
     app.get("*", (req, res) => {

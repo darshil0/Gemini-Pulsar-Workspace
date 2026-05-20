@@ -22,7 +22,9 @@ export const NotificationProvider: React.FC<{ children: ReactNode }> = ({ childr
   const [notifications, setNotifications] = useState<Notification[]>([]);
 
   const notify = useCallback((type: NotificationType, message: string, description?: string) => {
-    const id = crypto.randomUUID();
+    const id = typeof crypto !== 'undefined' && crypto.randomUUID 
+      ? crypto.randomUUID() 
+      : Math.random().toString(36).substring(2, 15) + Date.now().toString(36);
     setNotifications(prev => [...prev, { id, type, message, description }]);
 
     // Auto-remove after 5 seconds
