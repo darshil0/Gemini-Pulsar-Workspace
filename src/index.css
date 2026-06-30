@@ -1,20 +1,20 @@
-@import "tailwindcss";
+@import 'tailwindcss';
 
 @theme {
-  --font-sans: "Inter", -apple-system, ui-sans-serif, system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
-  
+  --font-sans: 'Inter', -apple-system, ui-sans-serif, system-ui, sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, SFMono-Regular, monospace;
+
   --color-brand-primary: #3b82f6;
   --color-brand-secondary: #9333ea;
-  --color-bg-deep: #05070A;
-  --color-text-slate: #E2E8F0;
+  --color-bg-deep: #05070a;
+  --color-text-slate: #e2e8f0;
 }
 
 @layer base {
   body {
     @apply bg-neutral-50 text-neutral-900 transition-colors duration-300;
   }
-  
+
   .dark body {
     background-color: var(--color-bg-deep);
     color: var(--color-text-slate);
@@ -25,15 +25,15 @@
   .glass {
     @apply bg-white/50 dark:bg-white/[0.03] backdrop-blur-xl border border-neutral-200 dark:border-white/[0.08];
   }
-  
+
   .glass-hover:hover {
     @apply bg-white/80 dark:bg-white/[0.06] border-neutral-300 dark:border-white/[0.15];
   }
-  
+
   .active-tab {
     @apply bg-blue-500/10 border border-blue-500/30 text-blue-600 dark:text-blue-400;
   }
-  
+
   .glass-card {
     @apply bg-white/50 dark:bg-white/[0.03] backdrop-blur-xl border border-neutral-200 dark:border-white/[0.08] rounded-2xl overflow-hidden;
   }
@@ -47,18 +47,32 @@
 }
 
 .shimmer {
-  background: linear-gradient(90deg, rgba(0,0,0,0) 0%, rgba(0,0,0,0.03) 50%, rgba(0,0,0,0) 100%);
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0) 0%,
+    rgba(0, 0, 0, 0.03) 50%,
+    rgba(0, 0, 0, 0) 100%
+  );
   background-size: 200% 100%;
   animation: shimmer 2s infinite;
 }
 
 .dark .shimmer {
-  background: linear-gradient(90deg, rgba(255,255,255,0) 0%, rgba(255,255,255,0.05) 50%, rgba(255,255,255,0) 100%);
+  background: linear-gradient(
+    90deg,
+    rgba(255, 255, 255, 0) 0%,
+    rgba(255, 255, 255, 0.05) 50%,
+    rgba(255, 255, 255, 0) 100%
+  );
 }
 
 @keyframes shimmer {
-  0% { background-position: -200% 0; }
-  100% { background-position: 200% 0; }
+  0% {
+    background-position: -200% 0;
+  }
+  100% {
+    background-position: 200% 0;
+  }
 }
 
 .animate-pulse-subtle {
@@ -66,7 +80,11 @@
 }
 
 @keyframes pulse-subtle {
-  0%, 100% { opacity: 1; }
-  50% { opacity: 0.85; }
+  0%,
+  100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.85;
+  }
 }
-

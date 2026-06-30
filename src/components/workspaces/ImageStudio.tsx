@@ -1,5 +1,20 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Upload, Image as ImageIcon, Sparkles, Download, Loader2, Wand2, Eraser, Layers, Palette, Camera, Grid, Trash2, Send, AlertCircle } from 'lucide-react';
+import {
+  Upload,
+  Image as ImageIcon,
+  Sparkles,
+  Download,
+  Loader2,
+  Wand2,
+  Eraser,
+  Layers,
+  Palette,
+  Camera,
+  Grid,
+  Trash2,
+  Send,
+  AlertCircle,
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { transformImage } from '../../services/gemini';
 import { cn } from '../../lib/utils';
@@ -12,7 +27,7 @@ const iconMap: Record<string, React.ComponentType<{ className?: string }>> = {
   Palette,
   Camera,
   Eraser,
-  Wand2
+  Wand2,
 };
 
 export const ImageStudio: React.FC = () => {
@@ -23,7 +38,7 @@ export const ImageStudio: React.FC = () => {
   const [isProcessing, setIsProcessing] = useState(false);
   const [result, setResult] = useState<ImageTransformationResult | null>(null);
   const [error, setError] = useState<string | null>(null);
-  
+
   const fileInputRef = useRef<HTMLInputElement>(null);
   const imageBase64Ref = useRef<string | null>(null);
   const imageRef = useRef<string | null>(null);
@@ -46,27 +61,27 @@ export const ImageStudio: React.FC = () => {
     const file = e.target.files?.[0];
     if (file) {
       if (file.size > 4 * 1024 * 1024) {
-        setError("Image is too large. Please upload an image under 4MB.");
+        setError('Image is too large. Please upload an image under 4MB.');
         return;
       }
-      
+
       setError(null);
       // Clear previous object URL if it exists to prevent memory leaks
       if (image && image.startsWith('blob:')) {
         URL.revokeObjectURL(image);
       }
-      
+
       const objectUrl = URL.createObjectURL(file);
       setImage(objectUrl);
       setMimeType(file.type);
-      
+
       const reader = new FileReader();
       reader.onload = () => {
         const result = reader.result as string;
-        // Strip data URI header immediately (Issue #7) 
+        // Strip data URI header immediately (Issue #7)
         imageBase64Ref.current = result.includes(',') ? result.split(',')[1] : result;
       };
-      reader.onerror = () => setError("Failed to read image file.");
+      reader.onerror = () => setError('Failed to read image file.');
       reader.readAsDataURL(file);
     }
   };
@@ -85,9 +100,9 @@ export const ImageStudio: React.FC = () => {
   };
 
   const processImg = async (stylePrompt?: string) => {
-    const finalPrompt = (stylePrompt || prompt || "").trim();
+    const finalPrompt = (stylePrompt || prompt || '').trim();
     if (!finalPrompt) {
-      setError("Please select a quick style or input a custom remix instruction.");
+      setError('Please select a quick style or input a custom remix instruction.');
       notify('error', 'Transformation Stopped', 'No remix instructions were provided.');
       return;
     }
@@ -99,7 +114,11 @@ export const ImageStudio: React.FC = () => {
     try {
       const data = await transformImage(b64, mimeType, finalPrompt);
       setResult(data);
-      notify('success', 'Transformation Complete', 'Your image has been re-imagined by Gemini Vision.');
+      notify(
+        'success',
+        'Transformation Complete',
+        'Your image has been re-imagined by Gemini Vision.',
+      );
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown image transformation error';
       setError(`Image transformation failed: ${msg}. (Max file size: 4MB).`);
@@ -126,7 +145,6 @@ export const ImageStudio: React.FC = () => {
   return (
     <div className="flex flex-col h-full gap-6">
       <div className="grid grid-cols-1 lg:grid-cols-5 gap-6 flex-1 min-h-0">
-        
         {/* Sidebar: Controls */}
         <div className="lg:col-span-2 flex flex-col gap-6">
           <div className="glass-card p-6 flex flex-col gap-6">
@@ -136,7 +154,7 @@ export const ImageStudio: React.FC = () => {
                 Source Image
               </h3>
               {image && (
-                <button 
+                <button
                   onClick={clearSession}
                   className="text-[10px] font-bold text-red-400/60 hover:text-red-400 transition-colors uppercase tracking-widest flex items-center gap-1"
                 >
@@ -145,33 +163,41 @@ export const ImageStudio: React.FC = () => {
                 </button>
               )}
             </div>
-            
-            <div 
+
+            <div
               onClick={() => fileInputRef.current?.click()}
               className={cn(
-                "relative aspect-video rounded-xl border border-white/5 flex flex-col items-center justify-center cursor-pointer transition-all overflow-hidden bg-black/20 group",
-                image ? "border-brand-primary/50" : "hover:border-white/20"
+                'relative aspect-video rounded-xl border border-white/5 flex flex-col items-center justify-center cursor-pointer transition-all overflow-hidden bg-black/20 group',
+                image ? 'border-brand-primary/50' : 'hover:border-white/20',
               )}
               aria-label="Upload image"
             >
-              <input 
-                type="file" 
-                ref={fileInputRef} 
-                onChange={handleFileChange} 
-                accept="image/*" 
-                className="hidden" 
+              <input
+                type="file"
+                ref={fileInputRef}
+                onChange={handleFileChange}
+                accept="image/*"
+                className="hidden"
               />
               {image ? (
                 <div className="relative w-full h-full">
-                  <img src={image} className="w-full h-full object-cover transition-transform group-hover:scale-105" alt="Source" />
+                  <img
+                    src={image}
+                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                    alt="Source"
+                  />
                   <div className="absolute inset-0 bg-black/40 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center">
-                    <span className="text-xs font-bold text-white uppercase tracking-widest">Change Image</span>
+                    <span className="text-xs font-bold text-white uppercase tracking-widest">
+                      Change Image
+                    </span>
                   </div>
                 </div>
               ) : (
                 <div className="flex flex-col items-center gap-2 text-neutral-400 dark:text-slate-500">
                   <Upload className="w-6 h-6 opacity-50" />
-                  <span className="text-[10px] font-bold uppercase tracking-wider">Upload Asset</span>
+                  <span className="text-[10px] font-bold uppercase tracking-wider">
+                    Upload Asset
+                  </span>
                 </div>
               )}
             </div>
@@ -193,7 +219,9 @@ export const ImageStudio: React.FC = () => {
                       aria-label={`Apply ${style.label} style`}
                     >
                       <IconComponent className="w-4 h-4 group-hover:scale-110 transition-transform text-blue-400" />
-                      <span className="text-[9px] font-bold uppercase tracking-tight">{style.label}</span>
+                      <span className="text-[9px] font-bold uppercase tracking-tight">
+                        {style.label}
+                      </span>
                     </button>
                   );
                 })}
@@ -202,8 +230,8 @@ export const ImageStudio: React.FC = () => {
 
             <div className="space-y-3">
               <h3 className="text-[10px] font-bold uppercase tracking-widest text-neutral-500 dark:text-slate-500 flex items-center gap-2">
-                 <Grid className="w-3 h-3" />
-                 Custom Remix
+                <Grid className="w-3 h-3" />
+                Custom Remix
               </h3>
               <div className="flex gap-2">
                 <input
@@ -227,7 +255,6 @@ export const ImageStudio: React.FC = () => {
           </div>
         </div>
 
-
         {/* Main: Preview */}
         <div className="lg:col-span-3 glass-card flex flex-col">
           <div className="p-4 border-b border-white/10 flex items-center justify-between">
@@ -236,7 +263,7 @@ export const ImageStudio: React.FC = () => {
               Creative Result
             </h3>
             {result && (
-              <button 
+              <button
                 onClick={handleDownload}
                 className="flex items-center gap-2 px-3 py-1.5 bg-brand-primary/10 text-brand-primary rounded-lg text-xs font-semibold hover:bg-brand-primary/20 transition-all"
               >
@@ -249,7 +276,7 @@ export const ImageStudio: React.FC = () => {
           <div className="flex-1 flex flex-col p-6 items-center justify-center relative min-h-[300px]">
             <AnimatePresence mode="wait">
               {error ? (
-                <motion.div 
+                <motion.div
                   key="error"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -259,13 +286,13 @@ export const ImageStudio: React.FC = () => {
                   <AlertCircle className="w-12 h-12" />
                   <p className="text-sm font-medium">{error}</p>
                   <div className="flex gap-4">
-                    <button 
+                    <button
                       onClick={() => setError(null)}
                       className="mt-2 text-xs uppercase tracking-widest font-bold border border-red-500/20 px-3 py-1 rounded"
                     >
                       Dismiss & Retry
                     </button>
-                    <button 
+                    <button
                       onClick={clearSession}
                       className="mt-2 text-xs uppercase tracking-widest font-bold opacity-50 hover:text-red-400 transition-colors"
                     >
@@ -274,7 +301,7 @@ export const ImageStudio: React.FC = () => {
                   </div>
                 </motion.div>
               ) : isProcessing ? (
-                <motion.div 
+                <motion.div
                   key="loading"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
@@ -288,29 +315,35 @@ export const ImageStudio: React.FC = () => {
                   <p className="text-sm animate-pulse">Gemini is re-imagining your image...</p>
                 </motion.div>
               ) : result ? (
-                <motion.div 
+                <motion.div
                   key="result"
                   initial={{ opacity: 0, scale: 0.9 }}
                   animate={{ opacity: 1, scale: 1 }}
                   className="w-full h-full flex flex-col gap-4 overflow-hidden"
                 >
                   <div className="flex-1 rounded-xl overflow-hidden bg-neutral-800 shadow-inner group relative">
-                    <img src={result.imageUrl} className="w-full h-full object-contain" alt="Result" />
+                    <img
+                      src={result.imageUrl}
+                      className="w-full h-full object-contain"
+                      alt="Result"
+                    />
                     {!result.imageUrl && (
-                       <div className="flex-1 flex items-center justify-center p-8 text-center text-neutral-400 italic">
-                         Image generation direct bit-stream inhibited.
-                       </div>
+                      <div className="flex-1 flex items-center justify-center p-8 text-center text-neutral-400 italic">
+                        Image generation direct bit-stream inhibited.
+                      </div>
                     )}
                   </div>
                   {result.analysis && (
                     <div className="p-4 rounded-xl bg-brand-primary/10 border border-brand-primary/20 text-xs leading-relaxed max-h-32 overflow-y-auto">
-                      <p className="font-semibold text-brand-primary mb-1 uppercase tracking-widest text-[9px]">AI Vision Analysis</p>
+                      <p className="font-semibold text-brand-primary mb-1 uppercase tracking-widest text-[9px]">
+                        AI Vision Analysis
+                      </p>
                       {result.analysis}
                     </div>
                   )}
                 </motion.div>
               ) : (
-                <motion.div 
+                <motion.div
                   key="empty"
                   initial={{ opacity: 0 }}
                   animate={{ opacity: 1 }}
