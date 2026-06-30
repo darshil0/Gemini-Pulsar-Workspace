@@ -1,9 +1,9 @@
 import tailwindcss from '@tailwindcss/vite';
 import react from '@vitejs/plugin-react';
 import path from 'path';
-import {defineConfig} from 'vite';
+import { defineConfig } from 'vite';
 
-export default defineConfig(({mode}) => {
+export default defineConfig(({ mode }) => {
   return {
     plugins: [react(), tailwindcss()],
     resolve: {
@@ -22,11 +22,20 @@ export default defineConfig(({mode}) => {
       sourcemap: false,
       rollupOptions: {
         output: {
-          manualChunks: {
-            vendor: ['react', 'react-dom', 'motion', 'recharts', 'd3']
-          }
-        }
-      }
-    }
+          manualChunks: (id) => {
+            if (id.includes('node_modules')) {
+              if (
+                id.includes('react') ||
+                id.includes('motion') ||
+                id.includes('recharts') ||
+                id.includes('d3')
+              ) {
+                return 'vendor';
+              }
+            }
+          },
+        },
+      },
+    },
   };
 });
