@@ -1,5 +1,17 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { Mail, Send, Loader2, CheckCircle2, AlertCircle, Copy, Sparkles, User, Tag, Clock, Trash2 } from 'lucide-react';
+import {
+  Mail,
+  Send,
+  Loader2,
+  CheckCircle2,
+  AlertCircle,
+  Copy,
+  Sparkles,
+  User,
+  Tag,
+  Clock,
+  Trash2,
+} from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import { analyzeEmail } from '../../services/gemini';
 import { cn } from '../../lib/utils';
@@ -15,10 +27,10 @@ export const EmailHelper: React.FC = () => {
   const { notify } = useNotification();
   const [input, setInput] = useState('');
   const [isAnalyzing, setIsAnalyzing] = useState(false);
-  const [result, setResult] = useState<HistoryItem| null>(null);
+  const [result, setResult] = useState<HistoryItem | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [isCopied, setIsCopied] = useState(false);
-  
+
   const copyTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   useEffect(() => {
@@ -36,11 +48,10 @@ export const EmailHelper: React.FC = () => {
         // Filter out entries older than 24 hours
         const now = Date.now();
         const oneDay = 24 * 60 * 60 * 1000;
-        return (parsed as HistoryItem[])
-          .filter(item => now - item.timestamp < oneDay);
+        return (parsed as HistoryItem[]).filter((item) => now - item.timestamp < oneDay);
       }
     } catch (e) {
-      console.error("Failed to load history", e);
+      console.error('Failed to load history', e);
     }
     return [];
   });
@@ -54,14 +65,18 @@ export const EmailHelper: React.FC = () => {
     setError(null);
     try {
       const data = await analyzeEmail(input);
-      const newItem = { ...data, timestamp: Date.now() + Math.random() };
+      const newItem = { ...data, timestamp: Date.now() };
       setResult(newItem);
-      notify('success', 'Analysis Complete', `Email identified as ${data.category} with ${data.priority} priority.`);
-      
-      setHistory(prev => {
-         const newHistory = [newItem, ...prev].slice(0, 5);
-         localStorage.setItem('email_analysis_history', JSON.stringify(newHistory));
-         return newHistory;
+      notify(
+        'success',
+        'Analysis Complete',
+        `Email identified as ${data.category} with ${data.priority} priority.`,
+      );
+
+      setHistory((prev) => {
+        const newHistory = [newItem, ...prev].slice(0, 5);
+        localStorage.setItem('email_analysis_history', JSON.stringify(newHistory));
+        return newHistory;
       });
     } catch (err: unknown) {
       const msg = err instanceof Error ? err.message : 'Unknown processor error';
@@ -92,34 +107,36 @@ export const EmailHelper: React.FC = () => {
       await navigator.clipboard.writeText(text);
       setIsCopied(true);
       notify('success', 'Copied to Clipboard', 'The draft response is ready to be pasted.');
-      
+
       copyTimeoutRef.current = setTimeout(() => {
         setIsCopied(false);
         copyTimeoutRef.current = null;
       }, 4000); // Extended notification window
     } catch (err) {
       notify('error', 'Copy Failed', 'Could not access clipboard.');
-      console.error("Failed to copy text:", err);
+      console.error('Failed to copy text:', err);
     }
   };
 
   return (
     <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 h-full">
       {/* Input Side */}
-      <motion.div 
+      <motion.div
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
         className="flex flex-col gap-4 min-h-0"
       >
         <div className="flex-1 glass-card p-5 flex flex-col relative group/input">
           <div className="flex items-center justify-between mb-4">
-            <label className="text-xs font-bold uppercase tracking-widest text-neutral-500 dark:text-slate-500">Input Content</label>
+            <label className="text-xs font-bold uppercase tracking-widest text-neutral-500 dark:text-slate-500">
+              Input Content
+            </label>
             <div className="flex items-center gap-3">
               {input && (
-                <button 
-                   onClick={clearInput}
-                   className="text-xs font-bold text-red-400/60 hover:text-red-400 transition-colors uppercase tracking-widest flex items-center gap-1"
-                   aria-label="Clear input"
+                <button
+                  onClick={clearInput}
+                  className="text-xs font-bold text-red-400/60 hover:text-red-400 transition-colors uppercase tracking-widest flex items-center gap-1"
+                  aria-label="Clear input"
                 >
                   <Trash2 className="w-3 h-3" />
                   Clear
@@ -130,7 +147,7 @@ export const EmailHelper: React.FC = () => {
               </span>
             </div>
           </div>
-          
+
           <textarea
             value={input}
             onChange={(e) => setInput(e.target.value)}
@@ -143,7 +160,12 @@ export const EmailHelper: React.FC = () => {
         <div className="glass-card p-4 flex flex-col gap-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-3">
-              <div className={cn("w-2 h-2 rounded-full", isAnalyzing ? "bg-blue-500 animate-pulse" : "bg-neutral-600")}></div>
+              <div
+                className={cn(
+                  'w-2 h-2 rounded-full',
+                  isAnalyzing ? 'bg-blue-500 animate-pulse' : 'bg-neutral-600',
+                )}
+              ></div>
               <span className="text-xs font-medium text-slate-500">
                 {isAnalyzing ? 'Gemini is analyzing context...' : 'Ready to analyze'}
               </span>
@@ -152,10 +174,10 @@ export const EmailHelper: React.FC = () => {
               onClick={handleAnalyze}
               disabled={isAnalyzing || !input.trim()}
               className={cn(
-                "px-6 py-2 rounded-xl text-sm font-bold shadow-lg transition-all",
-                isAnalyzing || !input.trim() 
-                  ? "bg-white/5 text-neutral-500 cursor-not-allowed" 
-                  : "bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/20 active:scale-95"
+                'px-6 py-2 rounded-xl text-sm font-bold shadow-lg transition-all',
+                isAnalyzing || !input.trim()
+                  ? 'bg-white/5 text-neutral-500 cursor-not-allowed'
+                  : 'bg-blue-600 hover:bg-blue-500 text-white shadow-blue-600/20 active:scale-95',
               )}
             >
               {isAnalyzing ? 'Analyzing...' : 'Analyze Email'}
@@ -168,7 +190,7 @@ export const EmailHelper: React.FC = () => {
                 <h4 className="text-[10px] font-bold text-neutral-500 dark:text-slate-500 uppercase tracking-widest flex items-center gap-2">
                   <Clock className="w-3 h-3" /> Recent History (24h)
                 </h4>
-                <button 
+                <button
                   onClick={() => {
                     localStorage.removeItem('email_analysis_history');
                     setHistory([]);
@@ -185,10 +207,10 @@ export const EmailHelper: React.FC = () => {
                     key={item.timestamp}
                     onClick={() => selectFromHistory(item)}
                     className={cn(
-                      "flex-shrink-0 px-3 py-2 rounded-lg text-[10px] font-bold border transition-all",
-                      result?.timestamp === item.timestamp 
-                        ? "bg-blue-500/20 border-blue-500/40 text-blue-300"
-                        : "bg-white/5 border-white/5 text-slate-400 hover:bg-white/10 hover:text-white"
+                      'flex-shrink-0 px-3 py-2 rounded-lg text-[10px] font-bold border transition-all',
+                      result?.timestamp === item.timestamp
+                        ? 'bg-blue-500/20 border-blue-500/40 text-blue-300'
+                        : 'bg-white/5 border-white/5 text-slate-400 hover:bg-white/10 hover:text-white',
                     )}
                   >
                     <span className="capitalize">{item.category}</span>
@@ -202,12 +224,11 @@ export const EmailHelper: React.FC = () => {
         </div>
       </motion.div>
 
-
       {/* Output Side */}
       <div className="flex flex-col gap-6">
         <AnimatePresence mode="wait">
           {!result && !isAnalyzing && !error && (
-            <motion.div 
+            <motion.div
               key="empty"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -218,12 +239,14 @@ export const EmailHelper: React.FC = () => {
                 <Mail className="w-8 h-8 text-brand-primary" />
               </div>
               <h3 className="text-lg font-medium mb-2">No analysis yet</h3>
-              <p className="text-sm max-w-xs">Paste an email on the left and click Analyze to see magic happen.</p>
+              <p className="text-sm max-w-xs">
+                Paste an email on the left and click Analyze to see magic happen.
+              </p>
             </motion.div>
           )}
 
           {isAnalyzing && (
-            <motion.div 
+            <motion.div
               key="loading"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -237,7 +260,7 @@ export const EmailHelper: React.FC = () => {
           )}
 
           {error && (
-            <motion.div 
+            <motion.div
               key="error"
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
@@ -247,7 +270,7 @@ export const EmailHelper: React.FC = () => {
               <AlertCircle className="w-12 h-12 text-red-500 mb-4" />
               <h3 className="text-lg font-medium text-red-500 mb-2">Analysis Failed</h3>
               <p className="text-sm opacity-80">{error}</p>
-              <button 
+              <button
                 onClick={handleAnalyze}
                 className="mt-6 px-4 py-2 bg-red-500 text-white rounded-lg hover:bg-red-600 transition-colors"
               >
@@ -257,7 +280,7 @@ export const EmailHelper: React.FC = () => {
           )}
 
           {result && !isAnalyzing && (
-            <motion.div 
+            <motion.div
               key="result"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
@@ -265,15 +288,21 @@ export const EmailHelper: React.FC = () => {
             >
               <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
                 <div className="glass-card p-4">
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter mb-1">Category</p>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter mb-1">
+                    Category
+                  </p>
                   <p className="text-blue-400 font-semibold">{result.category}</p>
                 </div>
                 <div className="glass-card p-4 border-l-4 border-l-amber-500/50">
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter mb-1">Priority</p>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter mb-1">
+                    Priority
+                  </p>
                   <p className="text-amber-400 font-semibold capitalize">{result.priority}</p>
                 </div>
                 <div className="glass-card p-4 sm:col-span-1 col-span-2">
-                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter mb-1">Sentiment</p>
+                  <p className="text-[10px] font-bold text-slate-500 uppercase tracking-tighter mb-1">
+                    Sentiment
+                  </p>
                   <p className="text-slate-200 font-semibold">{result.mood}</p>
                 </div>
               </div>
@@ -281,14 +310,19 @@ export const EmailHelper: React.FC = () => {
               {/* Action Items */}
               <div className="glass-card p-6 flex flex-col gap-4">
                 <h3 className="text-sm font-bold text-slate-400 flex items-center gap-2">
-                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span> 
+                  <span className="w-1.5 h-1.5 bg-blue-500 rounded-full"></span>
                   Suggested Action Items
                 </h3>
                 <ul className="space-y-3">
                   {result.actionItems.map((item, i) => (
-                    <li key={i} className="flex items-center gap-3 text-sm text-slate-300 bg-white/5 p-3 rounded-xl border border-white/5 group transition-all glass-hover">
+                    <li
+                      key={i}
+                      className="flex items-center gap-3 text-sm text-slate-300 bg-white/5 p-3 rounded-xl border border-white/5 group transition-all glass-hover"
+                    >
                       <span className="text-emerald-400 font-bold">✓</span>
-                      <span className="opacity-80 group-hover:opacity-100 transition-opacity">{item}</span>
+                      <span className="opacity-80 group-hover:opacity-100 transition-opacity">
+                        {item}
+                      </span>
                     </li>
                   ))}
                 </ul>
@@ -299,19 +333,23 @@ export const EmailHelper: React.FC = () => {
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-sm font-bold text-slate-200">AI Draft Response</h3>
                   <div className="flex gap-2">
-                    <button 
+                    <button
                       onClick={() => copyToClipboard(result.draftReply)}
                       className={cn(
-                        "text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all uppercase tracking-widest flex items-center gap-1.5",
-                        isCopied 
-                          ? "bg-emerald-500/20 text-emerald-400 border border-emerald-500/30" 
-                          : "bg-white/5 text-slate-400 hover:text-white glass-hover"
+                        'text-[10px] font-bold px-3 py-1.5 rounded-lg transition-all uppercase tracking-widest flex items-center gap-1.5',
+                        isCopied
+                          ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30'
+                          : 'bg-white/5 text-slate-400 hover:text-white glass-hover',
                       )}
                     >
-                      {isCopied ? <CheckCircle2 className="w-3 h-3" /> : <Copy className="w-3 h-3" />}
+                      {isCopied ? (
+                        <CheckCircle2 className="w-3 h-3" />
+                      ) : (
+                        <Copy className="w-3 h-3" />
+                      )}
                       {isCopied ? 'Copied' : 'Copy'}
                     </button>
-                    <button 
+                    <button
                       onClick={handleAnalyze}
                       className="text-[10px] font-bold bg-white/5 text-slate-400 px-3 py-1.5 rounded-lg hover:text-white glass-hover transition-colors uppercase tracking-widest flex items-center gap-1.5"
                     >

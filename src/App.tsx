@@ -26,12 +26,12 @@ export default function App() {
         const data = await res.json();
         setHasApiKey(!!data.hasApiKey);
       } catch (e) {
-        console.error("Health check failed", e);
+        console.error('Health check failed', e);
         setHasApiKey(false);
       }
     };
     checkApiKey();
-    
+
     // Apply theme
     if (isDarkMode) {
       document.documentElement.classList.add('dark');
@@ -53,11 +53,13 @@ export default function App() {
         {/* Background blobs */}
         <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
           <div className="absolute -top-[20%] -left-[10%] w-[50%] h-[50%] bg-blue-500/10 dark:bg-blue-500/5 blur-[120px] rounded-full animate-pulse-subtle" />
-          <div className="absolute top-[40%] -right-[10%] w-[60%] h-[60%] bg-purple-500/10 dark:bg-purple-500/5 blur-[120px] rounded-full animate-pulse-subtle" style={{ animationDelay: '2s' }} />
+          <div
+            className="absolute top-[40%] -right-[10%] w-[60%] h-[60%] bg-purple-500/10 dark:bg-purple-500/5 blur-[120px] rounded-full animate-pulse-subtle"
+            style={{ animationDelay: '2s' }}
+          />
         </div>
 
         <div className="max-w-[1400px] mx-auto min-h-screen flex flex-col p-4 md:p-8">
-          
           {/* Header */}
           <header className="flex flex-col md:flex-row items-center justify-between gap-6 mb-8 lg:mb-12">
             <div className="flex items-center gap-3">
@@ -66,7 +68,9 @@ export default function App() {
               </div>
               <div>
                 <h1 className="text-2xl font-bold tracking-tight">Google Pulsar</h1>
-                <p className="text-xs font-medium tracking-[0.2em] uppercase opacity-50">High-Performance Workspace</p>
+                <p className="text-xs font-medium tracking-[0.2em] uppercase opacity-50">
+                  High-Performance Workspace
+                </p>
               </div>
             </div>
 
@@ -76,17 +80,17 @@ export default function App() {
                   key={tab.id}
                   onClick={() => setActiveTab(tab.id as ActiveTab)}
                   className={cn(
-                    "relative px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-all duration-200 z-10",
-                    activeTab === tab.id 
-                      ? "text-blue-600 dark:text-blue-400" 
-                      : "text-neutral-500 dark:text-slate-400 hover:text-neutral-900 dark:hover:text-white"
+                    'relative px-4 py-2 rounded-lg text-sm font-medium flex items-center gap-2 transition-all duration-200 z-10',
+                    activeTab === tab.id
+                      ? 'text-blue-600 dark:text-blue-400'
+                      : 'text-neutral-500 dark:text-slate-400 hover:text-neutral-900 dark:hover:text-white',
                   )}
                 >
                   {activeTab === tab.id && (
                     <motion.div
                       layoutId="active-tab-bg"
                       className="absolute inset-0 bg-white dark:bg-blue-600/10 border border-neutral-300 dark:border-blue-400/30 rounded-lg -z-10 shadow-sm dark:shadow-none"
-                      transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
+                      transition={{ type: 'spring', bounce: 0.2, duration: 0.6 }}
                     />
                   )}
                   <tab.icon className="w-4 h-4" />
@@ -95,86 +99,100 @@ export default function App() {
               ))}
               <div className="w-px h-6 bg-neutral-300 dark:bg-white/10 mx-1" />
               <button
-                 onClick={() => setIsDarkMode(!isDarkMode)}
-                 className="p-2 rounded-lg text-neutral-500 dark:text-slate-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className="p-2 rounded-lg text-neutral-500 dark:text-slate-400 hover:text-neutral-900 dark:hover:text-white transition-colors"
               >
-                {isDarkMode ? <Sun className="w-5 h-5 text-yellow-500" /> : <Moon className="w-5 h-5" />}
+                {isDarkMode ? (
+                  <Sun className="w-5 h-5 text-yellow-500" />
+                ) : (
+                  <Moon className="w-5 h-5" />
+                )}
               </button>
             </nav>
 
             <div className="flex items-center gap-4">
-               <div className={cn(
-                 "flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest bg-neutral-200/50 dark:bg-white/5 border border-neutral-300/50 dark:border-white/5",
-                 hasApiKey 
-                   ? "text-emerald-600 dark:text-emerald-400" 
-                   : "text-red-600 dark:text-red-400"
-               )}>
-                 <span className={cn("w-2 h-2 rounded-full", hasApiKey ? "bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]" : "bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]")}></span>
-                 {hasApiKey ? 'System Ready' : 'Key Required'}
-               </div>
+              <div
+                className={cn(
+                  'flex items-center gap-2 px-4 py-2 rounded-xl text-[10px] font-bold uppercase tracking-widest bg-neutral-200/50 dark:bg-white/5 border border-neutral-300/50 dark:border-white/5',
+                  hasApiKey
+                    ? 'text-emerald-600 dark:text-emerald-400'
+                    : 'text-red-600 dark:text-red-400',
+                )}
+              >
+                <span
+                  className={cn(
+                    'w-2 h-2 rounded-full',
+                    hasApiKey
+                      ? 'bg-emerald-500 shadow-[0_0_8px_rgba(16,185,129,0.5)]'
+                      : 'bg-red-500 shadow-[0_0_8px_rgba(239,68,68,0.5)]',
+                  )}
+                ></span>
+                {hasApiKey ? 'System Ready' : 'Key Required'}
+              </div>
             </div>
           </header>
 
-        {/* Main Workspace */}
-        <main className="flex-1 glass dark:bg-white/[0.02] shadow-2xl rounded-3xl p-6 md:p-8 relative overflow-hidden flex flex-col min-h-0 transition-colors duration-300 border-neutral-200 dark:border-white/10">
-          {/* Internal background elements */}
-          <div className="absolute top-0 right-0 p-8 flex gap-2 opacity-5 pointer-events-none">
-            <Sparkles className="w-32 h-32" />
-          </div>
+          {/* Main Workspace */}
+          <main className="flex-1 glass dark:bg-white/[0.02] shadow-2xl rounded-3xl p-6 md:p-8 relative overflow-hidden flex flex-col min-h-0 transition-colors duration-300 border-neutral-200 dark:border-white/10">
+            {/* Internal background elements */}
+            <div className="absolute top-0 right-0 p-8 flex gap-2 opacity-5 pointer-events-none">
+              <Sparkles className="w-32 h-32" />
+            </div>
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={activeTab}
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -10 }}
-              transition={{ duration: 0.3 }}
-              className="h-full"
-            >
-              {activeTab === 'email' && <EmailHelper />}
-              {activeTab === 'image' && <ImageStudio />}
-              {activeTab === 'voice' && <VocalWorkspace />}
-              {activeTab === 'settings' && (
-                <div className="max-w-2xl mx-auto py-12">
-                   <h2 className="text-3xl font-bold mb-8">System Configuration</h2>
-                   <div className="space-y-6">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -10 }}
+                transition={{ duration: 0.3 }}
+                className="h-full"
+              >
+                {activeTab === 'email' && <EmailHelper />}
+                {activeTab === 'image' && <ImageStudio />}
+                {activeTab === 'voice' && <VocalWorkspace />}
+                {activeTab === 'settings' && (
+                  <div className="max-w-2xl mx-auto py-12">
+                    <h2 className="text-3xl font-bold mb-8">System Configuration</h2>
+                    <div className="space-y-6">
                       <div className="glass-card p-6">
-                         <div className="flex items-center gap-3 mb-4">
-                            <Info className="w-5 h-5 text-brand-primary" />
-                            <h3 className="font-semibold italic">Gemini API Connection</h3>
-                         </div>
-                         <p className="text-sm opacity-80 mb-6 leading-relaxed">
-                            Your workspace is configured to use the Gemini Enterprise endpoints. 
-                            The API key is securely managed via AI Studio's environment secrets.
-                         </p>
-                         <div className="flex items-center justify-between p-4 bg-black/20 rounded-xl">
-                            <span className="text-xs font-mono">GEMINI_API_KEY</span>
-                            <span className="text-xs font-bold text-emerald-500 flex items-center gap-2">
-                               <CheckCircle2 className="w-3 h-3" />
-                               VERIFIED BY RUNTIME
-                            </span>
-                         </div>
+                        <div className="flex items-center gap-3 mb-4">
+                          <Info className="w-5 h-5 text-brand-primary" />
+                          <h3 className="font-semibold italic">Gemini API Connection</h3>
+                        </div>
+                        <p className="text-sm opacity-80 mb-6 leading-relaxed">
+                          Your workspace is configured to use the Gemini Enterprise endpoints. The
+                          API key is securely managed via AI Studio's environment secrets.
+                        </p>
+                        <div className="flex items-center justify-between p-4 bg-black/20 rounded-xl">
+                          <span className="text-xs font-mono">GEMINI_API_KEY</span>
+                          <span className="text-xs font-bold text-emerald-500 flex items-center gap-2">
+                            <CheckCircle2 className="w-3 h-3" />
+                            VERIFIED BY RUNTIME
+                          </span>
+                        </div>
                       </div>
 
                       <div className="glass-card p-6 border-brand-primary/20 bg-brand-primary/5">
-                         <h3 className="font-semibold mb-2">Workspace Optimization</h3>
-                         <p className="text-sm opacity-70">
-                            Pulsar uses Gemini 3 Flash for maximum performance and 3.1 Live for real-time vocal feedback. 
-                            Ensure you are in a quiet environment for the best vocal experience.
-                         </p>
+                        <h3 className="font-semibold mb-2">Workspace Optimization</h3>
+                        <p className="text-sm opacity-70">
+                          Pulsar uses Gemini 3 Flash for maximum performance and 3.1 Live for
+                          real-time vocal feedback. Ensure you are in a quiet environment for the
+                          best vocal experience.
+                        </p>
                       </div>
-                   </div>
-                </div>
-              )}
-            </motion.div>
-          </AnimatePresence>
-        </main>
+                    </div>
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
+          </main>
 
-        <footer className="mt-8 text-center opacity-30 text-[10px] uppercase tracking-[0.4em] font-medium">
-          Built with Gemini Multimodal Logic & Antigravity Systems
-        </footer>
+          <footer className="mt-8 text-center opacity-30 text-[10px] uppercase tracking-[0.4em] font-medium">
+            Built with Gemini Multimodal Logic & Antigravity Systems
+          </footer>
+        </div>
       </div>
-    </div>
-  </NotificationProvider>
+    </NotificationProvider>
   );
 }
