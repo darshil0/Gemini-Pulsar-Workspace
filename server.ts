@@ -17,7 +17,7 @@ const PORT = Number(process.env.PORT) || 3000;
 // CORS setup to secure API routes and allow authorized access
 app.use(
   cors({
-    origin: true,
+    origin: process.env.ALLOWED_ORIGINS ? process.env.ALLOWED_ORIGINS.split(',') : true,
     credentials: true,
   }),
 );
@@ -51,38 +51,47 @@ app.use((err: any, req: express.Request, res: express.Response, next: express.Ne
 const apiRateLimits: Record<string, { count: number; resetTime: number }> = {};
 function apiRateLimiter(windowMs: number, maxRequests: number) {
   return (req: express.Request, res: express.Response, next: express.NextFunction) => {
-    const ip =
-      (req.headers['x-forwarded-for'] as string) ||
+    const rawIp =
+      (req.headers['x-forwarded-for'] as string)?.split(',')[0]?.trim() ||
       req.socket.remoteAddress ||
       'global_fallback_ip';
     const now = Date.now();
 
-    if (!apiRateLimits[ip] || now > apiRateLimits[ip].resetTime) {
-      apiRateLimits[ip] = {
+    // Periodic cleanup of expired rate limit entries to prevent unbounded memory growth
+    if (Math.random() < 0.1) {
+      for (const key in apiRateLimits) {
+        if (apiRateLimits[key].resetTime < now) {
+          delete apiRateLimits[key];
+        }
+      }
+    }
+
+    if (!apiRateLimits[rawIp] || now > apiRateLimits[rawIp].resetTime) {
+      apiRateLimits[rawIp] = {
         count: 1,
         resetTime: now + windowMs,
       };
       res.setHeader('X-RateLimit-Limit', maxRequests);
       res.setHeader('X-RateLimit-Remaining', maxRequests - 1);
-      res.setHeader('X-RateLimit-Reset', Math.ceil(apiRateLimits[ip].resetTime / 1000));
+      res.setHeader('X-RateLimit-Reset', Math.ceil(apiRateLimits[rawIp].resetTime / 1000));
       return next();
     }
 
-    if (apiRateLimits[ip].count >= maxRequests) {
+    if (apiRateLimits[rawIp].count >= maxRequests) {
       res.setHeader('X-RateLimit-Limit', maxRequests);
       res.setHeader('X-RateLimit-Remaining', 0);
-      res.setHeader('X-RateLimit-Reset', Math.ceil(apiRateLimits[ip].resetTime / 1000));
-      const retryAfterSeconds = Math.ceil((apiRateLimits[ip].resetTime - now) / 1000);
+      res.setHeader('X-RateLimit-Reset', Math.ceil(apiRateLimits[rawIp].resetTime / 1000));
+      const retryAfterSeconds = Math.ceil((apiRateLimits[rawIp].resetTime - now) / 1000);
       res.setHeader('Retry-After', retryAfterSeconds);
       return res.status(429).json({
         error: `Too many requests. Rate limit exceeded. Try again in ${retryAfterSeconds} seconds.`,
       });
     }
 
-    apiRateLimits[ip].count += 1;
+    apiRateLimits[rawIp].count += 1;
     res.setHeader('X-RateLimit-Limit', maxRequests);
-    res.setHeader('X-RateLimit-Remaining', maxRequests - apiRateLimits[ip].count);
-    res.setHeader('X-RateLimit-Reset', Math.ceil(apiRateLimits[ip].resetTime / 1000));
+    res.setHeader('X-RateLimit-Remaining', maxRequests - apiRateLimits[rawIp].count);
+    res.setHeader('X-RateLimit-Reset', Math.ceil(apiRateLimits[rawIp].resetTime / 1000));
     next();
   };
 }

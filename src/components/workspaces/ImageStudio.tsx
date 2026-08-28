@@ -62,6 +62,7 @@ export const ImageStudio: React.FC = () => {
     if (file) {
       if (file.size > 4 * 1024 * 1024) {
         setError('Image is too large. Please upload an image under 4MB.');
+        if (fileInputRef.current) fileInputRef.current.value = '';
         return;
       }
 
@@ -97,9 +98,18 @@ export const ImageStudio: React.FC = () => {
     setResult(null);
     setError(null);
     imageBase64Ref.current = null;
+    if (fileInputRef.current) {
+      fileInputRef.current.value = '';
+    }
   };
 
   const processImg = async (stylePrompt?: string) => {
+    if (!image || !imageBase64Ref.current) {
+      setError('Please upload an image asset before applying transformations.');
+      notify('error', 'Transformation Stopped', 'No source image was uploaded.');
+      return;
+    }
+
     const finalPrompt = (stylePrompt || prompt || '').trim();
     if (!finalPrompt) {
       setError('Please select a quick style or input a custom remix instruction.');
@@ -108,7 +118,6 @@ export const ImageStudio: React.FC = () => {
     }
 
     const b64 = imageBase64Ref.current;
-    if (!b64) return;
     setIsProcessing(true);
     setError(null);
     try {

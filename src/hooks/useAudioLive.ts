@@ -133,7 +133,6 @@ export const useAudioLive = () => {
 
       sourceNode.connect(analyserNode);
       analyserNode.connect(workletNode);
-      workletNode.connect(audioContext.destination);
 
       const session = await connectLiveVoice({
         onopen: () => {
@@ -165,7 +164,8 @@ export const useAudioLive = () => {
             const bytes = new Uint8Array(binary.length);
             for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
 
-            const pcm16 = new Int16Array(bytes.buffer);
+            const alignedLength = bytes.length - (bytes.length % 2);
+            const pcm16 = new Int16Array(bytes.buffer, bytes.byteOffset, alignedLength / 2);
             const float32 = new Float32Array(pcm16.length);
             for (let i = 0; i < pcm16.length; i++) float32[i] = pcm16[i] / 0x7fff;
 
