@@ -3,7 +3,7 @@
 A high-performance AI dashboard featuring an intelligent email assistant, generative image studio, and a real-time vocal workspace powered by Gemini.
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
-[![Last Commit](https://img.shields.io/badge/last%20commit-June%202026-brightgreen.svg)]()
+[![Last Commit](https://img.shields.io/badge/last%20commit-August%202026-brightgreen.svg)]()
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue.svg?logo=typescript&logoColor=white)]()
 [![React](https://img.shields.io/badge/React-19.2-61DAFB.svg?logo=react&logoColor=black)]()
 [![Vite](https://img.shields.io/badge/Vite-8.2-646CFF.svg?logo=vite&logoColor=white)]()
