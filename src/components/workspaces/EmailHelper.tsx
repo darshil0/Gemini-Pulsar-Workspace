@@ -45,10 +45,15 @@ export const EmailHelper: React.FC = () => {
       const saved = localStorage.getItem('email_analysis_history');
       if (saved) {
         const parsed = JSON.parse(saved);
-        // Filter out entries older than 24 hours
-        const now = Date.now();
-        const oneDay = 24 * 60 * 60 * 1000;
-        return (parsed as HistoryItem[]).filter((item) => now - item.timestamp < oneDay);
+        if (Array.isArray(parsed)) {
+          // Filter out entries older than 24 hours
+          const now = Date.now();
+          const oneDay = 24 * 60 * 60 * 1000;
+          return parsed.filter(
+            (item): item is HistoryItem =>
+              item && typeof item === 'object' && typeof item.timestamp === 'number' && now - item.timestamp < oneDay,
+          );
+        }
       }
     } catch (e) {
       console.error('Failed to load history', e);

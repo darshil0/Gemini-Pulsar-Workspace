@@ -5,13 +5,13 @@ A high-performance AI dashboard featuring an intelligent email assistant, genera
 [![License: MIT](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Last Commit](https://img.shields.io/badge/last%20commit-June%202026-brightgreen.svg)]()
 [![TypeScript](https://img.shields.io/badge/TypeScript-6.0-blue.svg?logo=typescript&logoColor=white)]()
-[![React](https://img.shields.io/badge/React-19.0-61DAFB.svg?logo=react&logoColor=black)]()
-[![Vite](https://img.shields.io/badge/Vite-8.0-646CFF.svg?logo=vite&logoColor=white)]()
-[![Node.js](https://img.shields.io/badge/Node.js-20.x-339933.svg?logo=node.js&logoColor=white)]()
-[![Express](https://img.shields.io/badge/Express-4.x-000000.svg?logo=express&logoColor=white)]()
-[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-4.0-06B6D4.svg?logo=tailwind-css&logoColor=white)]()
-[![Framer Motion](https://img.shields.io/badge/Framer%20Motion-11.0-F024B6.svg?logo=framer&logoColor=white)]()
-[![Google Gemini](https://img.shields.io/badge/Google%20Gemini-2.0-4285F4.svg?logo=google-gemini&logoColor=white)]()
+[![React](https://img.shields.io/badge/React-19.2-61DAFB.svg?logo=react&logoColor=black)]()
+[![Vite](https://img.shields.io/badge/Vite-8.2-646CFF.svg?logo=vite&logoColor=white)]()
+[![Node.js](https://img.shields.io/badge/Node.js-22.x-339933.svg?logo=node.js&logoColor=white)]()
+[![Express](https://img.shields.io/badge/Express-4.21-000000.svg?logo=express&logoColor=white)]()
+[![Tailwind CSS](https://img.shields.io/badge/Tailwind%20CSS-4.3-06B6D4.svg?logo=tailwind-css&logoColor=white)]()
+[![Framer Motion](https://img.shields.io/badge/Motion-12.23-F024B6.svg?logo=framer&logoColor=white)]()
+[![Google Gemini](https://img.shields.io/badge/Google%20Gemini-2.19-4285F4.svg?logo=google-gemini&logoColor=white)]()
 [![D3.js](https://img.shields.io/badge/D3.js-7.x-F9A03F.svg?logo=d3.js&logoColor=white)]()
 [![Recharts](https://img.shields.io/badge/Recharts-2.x-22B573.svg)]()
 
@@ -85,9 +85,28 @@ For seamless integration into containerized orchestrators (e.g., Kubernetes, Clo
 
 ## 🚥 Getting Started
 
-1. Set your `GEMINI_API_KEY` in the environment variables (via the Settings menu).
-2. The application uses a single singleton `GoogleGenAI` instance for optimal resource usage.
-3. Access the **Vocal Workspace** to engage in real-time, ultra-low latency voice conversation.
+1. Set your `GEMINI_API_KEY` in your `.env` file:
+   ```env
+   GEMINI_API_KEY=your_gemini_api_key_here
+   ```
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+3. Run dev server:
+   ```bash
+   npm run dev
+   ```
+4. Run tests & lint:
+   ```bash
+   npm test
+   npm run lint
+   ```
+5. Build & run production bundle:
+   ```bash
+   npm run build
+   npm start
+   ```
 
 ## 🏗️ Architecture
 
