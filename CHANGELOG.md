@@ -2,6 +2,16 @@
 
 All notable changes to this project will be documented in this file.
 
+## [1.8.1] - 2026-08-28
+
+### Added
+
+- **Automated Test Suite**: Added Vitest test suite (`src/__tests__/app.test.ts`) covering key application functionality and unit tests for PCM audio buffer conversion logic.
+
+### Fixed
+
+- **Memory Leak & Security Fixes**: Fixed potential memory leaks, security vulnerabilities, and audio feedback loop issues in real-time audio and server proxy handlers.
+
 ## [1.8.0] - 2026-06-30
 
 ### Added
